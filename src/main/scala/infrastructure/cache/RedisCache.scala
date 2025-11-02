@@ -95,8 +95,8 @@ class RedisCacheImpl[F[_] : Async : Logger](redisHost: String, redisPort: Int, a
 
 object RedisCache {
 
-  import dev.profunktor.redis4cats.effect.Log.Stdout.given // With logs
-  // import dev.profunktor.redis4cats.effect.Log.NoOp.given // No logs
+  // import dev.profunktor.redis4cats.effect.Log.Stdout.given // With logs
+  import dev.profunktor.redis4cats.effect.Log.NoOp.given // No logs
 
   def apply[F[_] : Async : Logger](redisHost: String, redisPort: Int, appConfig: AppConfig): RedisCacheAlgebra[F] =
     new RedisCacheImpl[F](redisHost, redisPort, appConfig)

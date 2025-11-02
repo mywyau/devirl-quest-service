@@ -29,13 +29,7 @@ import org.typelevel.ci.CIString
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.Logger
 import repositories.*
-import routes.AuthRoutes.*
-import routes.HiscoreRoutes.*
-import routes.PricingPlanRoutes.pricingPlanRoutes
-import routes.PricingPlanRoutes.stripeBillingWebhookRoutes
-import routes.RegistrationRoutes.*
 import routes.Routes.*
-import routes.UploadRoutes.*
 import scala.concurrent.duration.*
 import scala.concurrent.duration.DurationInt
 import services.*

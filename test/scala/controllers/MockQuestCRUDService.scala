@@ -21,18 +21,6 @@ import services.QuestCRUDServiceAlgebra
 
 class MockQuestCRUDService(userQuestData: Map[String, QuestPartial]) extends QuestCRUDServiceAlgebra[IO] {
 
-  override def getHoursOfWork(questId: String): IO[Option[HoursOfWork]] = ???
-
-  override def upsertHoursOfWork(clientId: String, questId: String, request: HoursOfWork): IO[ValidatedNel[DatabaseErrors, DatabaseSuccess]] = ???
-
-  override def countNotEstimatedAndOpenQuests(): IO[Int] = ???
-
-  override def completeQuestAwardXp(questId: String, questStatus: QuestStatus, rank: Rank): IO[ValidatedNel[DatabaseErrors, DatabaseSuccess]] = ???
-
-  override def updateStatus(questId: String, questStatus: QuestStatus): IO[ValidatedNel[DatabaseErrors, DatabaseSuccess]] = ???
-
-  override def acceptQuest(questId: String, devId: String): IO[ValidatedNel[DatabaseErrors, DatabaseSuccess]] = ???
-
   override def getByQuestId(businessId: String): IO[Option[QuestPartial]] =
     userQuestData.get(businessId) match {
       case Some(address) => IO.pure(Some(address))

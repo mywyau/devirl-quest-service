@@ -54,40 +54,6 @@ class AuthControllerImpl[F[_] : Async : Logger](
               BadRequest(ErrorResponse("NO_COOKIE", "auth_session cookie not found").asJson)
                 .map(_.withContentType(`Content-Type`(MediaType.application.json)))
         }
-
-    case req @ POST -> Root / "auth" / "session" / "sync" / userId =>
-      Logger[F].debug(s"Incoming cookies: ${req.cookies.map(c => s"${c.name}=${c.content}").mkString(", ")}") *>
-        Logger[F].debug(s"POST - Updating session for userId: $userId") *>
-        Async[F].delay(req.cookies.find(_.name == "auth_session")).flatMap {
-          case Some(cookie) =>
-            Logger[F].debug(s"[AuthController][/auth/session/sync] Cache updated with cookie content: ${cookie.content}") *>
-              sessionService
-                .storeUserSession(
-                  userId = userId,
-                  cookieToken = cookie.content
-                )
-                .flatMap {
-                  case Valid(_) =>
-                    Logger[F].debug(s"[AuthController] Cache updated for $userId") *>
-                      Created(CreatedResponse(userId, "Session synced from DB").asJson)
-                        .map(_.withContentType(`Content-Type`(MediaType.application.json)))
-
-                  case Invalid(errors) =>
-                    Logger[F].warn(s"[AuthController] Cache update failed for $userId: $errors") *>
-                      BadRequest(ErrorResponse("CACHE_UPDATE_FAILED", errors.toList.map(_.toString).mkString(", ")).asJson)
-                        .map(_.withContentType(`Content-Type`(MediaType.application.json)))
-                }
-
-          case None =>
-            Logger[F].warn(s"[AuthController] No auth_session cookie for $userId") *>
-              BadRequest(ErrorResponse("NO_COOKIE", "auth_session cookie not found").asJson)
-                .map(_.withContentType(`Content-Type`(MediaType.application.json)))
-        }
-
-    case DELETE -> Root / "auth" / "session" / "delete" / userId =>
-      Logger[F].debug(s"[AuthControllerImpl] DELETE - Deleting session for $userId") *>
-        sessionService.deleteSession(userId) *>
-        Ok(DeletedResponse(userId, "Session deleted").asJson)
   }
 }
 

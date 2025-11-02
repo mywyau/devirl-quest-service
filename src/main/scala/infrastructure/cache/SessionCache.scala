@@ -9,17 +9,18 @@ import cats.syntax.all.*
 import configuration.AppConfig
 import dev.profunktor.redis4cats.*
 import dev.profunktor.redis4cats.effect.Log.Stdout.*
-import io.circe.generic.auto._
+import io.circe.Json
+import io.circe.generic.auto.*
 import io.circe.parser
 import io.circe.parser.decode
-import io.circe.syntax._
+import io.circe.syntax.*
 import io.circe.syntax.EncoderOps
-import io.circe.Json
 import models.auth.UserSession
 import models.cache.*
-import org.http4s.circe.*
 import org.http4s.EntityDecoder
+import org.http4s.circe.*
 import org.typelevel.log4cats.Logger
+
 import scala.concurrent.duration.*
 
 trait SessionCacheAlgebra[F[_]] {
@@ -40,16 +41,18 @@ trait SessionCacheAlgebra[F[_]] {
   def lookupSession(token: String): F[Option[UserSession]]
 }
 
-class SessionCacheImpl[F[_] : Async : Logger](redisHost: String, redisPort: Int, appConfig: AppConfig) extends SessionCacheAlgebra[F] {
+class SessionCacheImpl[F[_] : Async : Logger](appConfig: AppConfig) extends SessionCacheAlgebra[F] {
 
   implicit val userSessionDecoder: EntityDecoder[F, UserSession] = jsonOf[F, UserSession]
+
+  val redisHost = appConfig.redisConfig.host
+  val redisPort = appConfig.redisConfig.port
 
   private def withRedis[A](fa: RedisCommands[F, String, String] => F[A]): F[A] = {
     val redisUri = s"redis://$redisHost:$redisPort"
     Logger[F].debug(s"[SessionCache] Uri: $redisUri") *>
       Redis[F].utf8(redisUri).use(fa)
   }
-
   override def getSessionCookieOnly(userId: String): F[Option[String]] =
     Logger[F].debug(s"[SessionCache] Retrieving session for userId=$userId") *>
       withRedis(_.get(s"auth:session:$userId")).flatTap {
@@ -152,12 +155,12 @@ class SessionCacheImpl[F[_] : Async : Logger](redisHost: String, redisPort: Int,
 
 object SessionCache {
 
-  import dev.profunktor.redis4cats.effect.Log.Stdout.given // With logs
-  // import dev.profunktor.redis4cats.effect.Log.NoOp.given // No logs
+  // import dev.profunktor.redis4cats.effect.Log.Stdout.given // With logs
+  import dev.profunktor.redis4cats.effect.Log.NoOp.given // No logs
 
-  def apply[F[_] : Async : Logger](redisHost: String, redisPort: Int, appConfig: AppConfig): SessionCacheAlgebra[F] =
-    new SessionCacheImpl[F](redisHost, redisPort, appConfig)
+  def apply[F[_] : Async : Logger](appConfig: AppConfig): SessionCacheAlgebra[F] =
+    new SessionCacheImpl[F](appConfig)
 
-  def make[F[_] : Async : Logger](redisHost: String, redisPort: Int, appConfig: AppConfig): Resource[F, SessionCacheAlgebra[F]] =
-    Resource.pure(apply(redisHost, redisPort, appConfig))
+  def make[F[_] : Async : Logger](appConfig: AppConfig): Resource[F, SessionCacheAlgebra[F]] =
+    Resource.pure(apply(appConfig))
 }

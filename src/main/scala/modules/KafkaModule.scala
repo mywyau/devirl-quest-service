@@ -9,7 +9,6 @@ import configuration.AppConfig
 import org.typelevel.log4cats.Logger
 
 final case class KafkaProducers[F[_]](
-  questEstimationProducer: QuestEstimationEventProducerAlgebra[F],
   questEventProducer: QuestEventProducerAlgebra[F]
 )
 
@@ -27,16 +26,16 @@ object KafkaModule {
       )
 
       // ✅ Use it in your producers
-      questEstimationProducer = new QuestEstimationEventProducerImpl[F](
-        appConfig.kafka.topic.estimationFinalized,
-        producer
-      )
+      // questEstimationProducer = new QuestEstimationEventProducerImpl[F](
+        // appConfig.kafka.topic.estimationFinalized,
+        // producer
+      // )
 
       questEventProducer = new QuestEventProducerImpl[F](
         appConfig.kafka.topic.questCreated,
         producer
       )
 
-    } yield KafkaProducers(questEstimationProducer, questEventProducer)
+    } yield KafkaProducers(questEventProducer)
   }
 }
