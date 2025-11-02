@@ -1,8 +1,8 @@
-
 package models.events
 
-import io.circe.{Encoder, Decoder}
 import io.circe.generic.semiauto.*
+import io.circe.Decoder
+import io.circe.Encoder
 import java.time.Instant
 
 final case class QuestCreatedEvent(
