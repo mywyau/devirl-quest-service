@@ -27,7 +27,7 @@ class BaseControllerISpec(global: GlobalRead) extends IOSuite with ControllerISp
     val client = sharedResources._2.client
 
     val request =
-      Request[IO](GET, uri"http://127.0.0.1:9999/dev-quest-service/health")
+      Request[IO](GET, uri"http://127.0.0.1:9999/devirl-quest-service/health")
 
     client.run(request).use { response =>
       response.as[GetResponse].map { body =>

@@ -1,4 +1,4 @@
-# dev-quest-service
+# devirl-quest-service
 
 This Backend service is responsible for business domain data e.g. businesses, offices and desks.
 
@@ -163,7 +163,7 @@ aws --endpoint-url=http://localhost:4566 s3api get-object \
 cat output.txt
 ```
 
-http -f POST http://localhost:8080/dev-quest-service/upload file@./src/main/scala/controllers/UploadController.scala
+http -f POST http://localhost:8080/devirl-quest-service/upload file@./src/main/scala/controllers/UploadController.scala
 
 aws --endpoint-url=http://localhost:4566 s3 ls s3://dev-submissions/uploads/
 
@@ -178,34 +178,31 @@ cat output.txt
 
 ```
 http --download "http://localhost:4566/dev-submissions/uploads/ed677064-ac83-4bf5-9885-e834df6c80bc-UploadController.scala?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20250611T174401Z&X-Amz-SignedHeaders=host&X-Amz-Credential=AKIA46ZDE3YHIZ4M2JBR%2F20250611%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Expires=900&X-Amz-Signature=0abf1491fa2c893969b0e37c8c68f221ef1dd98a7d90285f8ab713dcecd99d1f"
-http POST http://localhost:8080/dev-quest-service/s3/presign-download key="uploads/ed677064-ac83-4bf5-9885-e834df6c80bc-UploadController.scala"
-http POST http://localhost:8080/dev-quest-service/s3/presign-download key="uploads/ed677064-ac83-4bf5-9885-e834df6c80bc-UploadController.scala"
-http -f POST http://localhost:8080/dev-quest-service/upload file@./src/main/scala/controllers/UploadController.scala
+http POST http://localhost:8080/devirl-quest-service/s3/presign-download key="uploads/ed677064-ac83-4bf5-9885-e834df6c80bc-UploadController.scala"
+http POST http://localhost:8080/devirl-quest-service/s3/presign-download key="uploads/ed677064-ac83-4bf5-9885-e834df6c80bc-UploadController.scala"
+http -f POST http://localhost:8080/devirl-quest-service/upload file@./src/main/scala/controllers/UploadController.scala
 ```
 
-
- uploads/b508ce06-258e-4d0b-b314-0671cbd6c982-DevQuestBackendAuthController.test.ts
-
+uploads/b508ce06-258e-4d0b-b314-0671cbd6c982-DevQuestBackendAuthController.test.ts
 
 ### Download example
 
 ```
-http POST http://localhost:8080/dev-quest-service/s3/presign-download key=uploads/b508ce06-258e-4d0b-b314-0671cbd6c982-DevQuestBackendAuthController.test.ts
+http POST http://localhost:8080/devirl-quest-service/s3/presign-download key=uploads/b508ce06-258e-4d0b-b314-0671cbd6c982-DevQuestBackendAuthController.test.ts
 ```
-
 
 http --download GET "http://localhost:4566/dev-submissions/uploads/b508ce06-258e-4d0b-b314-0671cbd6c982-DevQuestBackendAuthController.test.ts?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20250612T151211Z&X-Amz-SignedHeaders=host&X-Amz-Credential=AKIA46ZDE3YHIZ4M2JBR%2F20250612%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Expires=900&X-Amz-Signature=40b039fb31d064e800a8280d25693d1acfdb1a45be613ba40d3b50fb46fcfd67"
 
-
-### 
+###
 
 #### Request to get signed download url
 
 ```
- http POST http://localhost:8080/dev-quest-service/s3/presign-download key=uploads/b508ce06-258e-4d0b-b314-0671cbd6c982-DevQuestBackendAuthController.test.ts
+ http POST http://localhost:8080/devirl-quest-service/s3/presign-download key=uploads/b508ce06-258e-4d0b-b314-0671cbd6c982-DevQuestBackendAuthController.test.ts
 ```
 
 #### response for useful signed download url
+
 ```
 HTTP/1.1 200 OK
 Connection: keep-alive
@@ -225,8 +222,6 @@ Vary: Origin
 http --download GET  "http://localhost:4566/dev-submissions/uploads/b508ce06-258e-4d0b-b314-0671cbd6c982-DevQuestBackendAuthController.test.ts?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20250612T151211Z&X-Amz-SignedHeaders=host&X-Amz-Credential=AKIA46ZDE3YHIZ4M2JBR%2F20250612%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Expires=900&X-Amz-Signature=40b039fb31d064e800a8280d25693d1acfdb1a45be613ba40d3b50fb46fcfd67"
 ```
 
-
-
 ```
 aws --endpoint-url=http://localhost:4566 s3 rm s3://dev-submissions --recursive
 ```
@@ -238,21 +233,20 @@ stripe login
 ```
 
 ```
-stripe listen --forward-to localhost:8080/dev-quest-service/billing/webhook
+stripe listen --forward-to localhost:8080/devirl-quest-service/billing/webhook
 ```
-
 
 ### Mermaid Wireframe Diagrams
-this is for mermaid diagrams 
+
+this is for mermaid diagrams
 
 ```
-command+shift+v 
+command+shift+v
 ```
 
 ## ✅ Option 3: Export to images (for READMEs, docs, or Confluence)
 
 This can be in a separate repo so we do not install the dependency here.
-
 
 ```
 npm install -g @mermaid-js/mermaid-cli

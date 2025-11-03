@@ -15,7 +15,6 @@ object AppModule {
   def run[F[_] : Async : Logger : Temporal : Parallel](
     appConfig: AppConfig,
     transactor: HikariTransactor[F],
-    redis: RedisCommands[F, String, String],
     httpClient: Client[F]
   ): Resource[F, Unit] =
     for {
@@ -35,6 +34,6 @@ object AppModule {
       // )
 
       // Start HTTP server
-      _ <- HttpModule.make[F](appConfig, transactor, redis, httpClient, kafkaProducers)
+      _ <- HttpModule.make[F](appConfig, transactor, httpClient, kafkaProducers)
     } yield ()
 }

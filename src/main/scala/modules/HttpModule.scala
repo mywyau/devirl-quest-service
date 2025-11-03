@@ -52,14 +52,11 @@ object HttpModule {
   private def allRoutes[F[_] : Async : Parallel : Logger](
     appConfig: AppConfig,
     transactor: HikariTransactor[F],
-    redisHost: String,
-    redisPort: Int,
-    redis: RedisCommands[F, String, String],
     httpClient: Client[F],
     kafkaProducers: KafkaProducers[F]
   ): HttpRoutes[F] =
     Router(
-      "/dev-quest-service" -> (
+      "/devirl-quest-service" -> (
         Routes.baseRoutes()
       )
     )
@@ -67,7 +64,6 @@ object HttpModule {
   def make[F[_] : Async : Parallel : Logger](
     appConfig: AppConfig,
     transactor: HikariTransactor[F],
-    redis: RedisCommands[F, String, String],
     httpClient: Client[F],
     kafkaProducers: KafkaProducers[F]
   ): Resource[F, HttpApp[F]] = {
@@ -75,7 +71,7 @@ object HttpModule {
     val redisHost = appConfig.redisConfig.host
     val redisPort = appConfig.redisConfig.port
 
-    val rawRoutes = allRoutes(appConfig, transactor, redisHost, redisPort, redis, httpClient, kafkaProducers)
+    val rawRoutes = allRoutes(appConfig, transactor, httpClient, kafkaProducers)
 
     val withCors =
       if (appConfig.featureSwitches.useCors) corsPolicy(rawRoutes)

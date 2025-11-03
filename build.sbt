@@ -4,7 +4,7 @@ ThisBuild / parallelExecution := true
 
 lazy val root = (project in file("."))
   .settings(
-    name := "dev-quest-service",
+    name := "devirl-quest-service",
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     Compile / run / fork := true,
     // scalaSource := baseDirectory.value / "src" / "main" / "scala",
@@ -20,7 +20,7 @@ lazy val root = (project in file("."))
 lazy val it = (project in file("it"))
   .dependsOn(root)
   .settings(
-    name := "dev-quest-service-it",
+    name := "devirl-quest-service-it",
     libraryDependencies ++= AppDependencies.integrationTest,
     fork := true,
     parallelExecution := true,
@@ -31,4 +31,3 @@ lazy val it = (project in file("it"))
 
 enablePlugins(ScalafmtPlugin)
 enablePlugins(JavaAppPackaging, DockerPlugin)
-

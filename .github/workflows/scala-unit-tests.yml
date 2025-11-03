@@ -1,4 +1,4 @@
-name: dev-quest-service Unit and Integration Tests
+name: devirl-quest-service Unit and Integration Tests
 
 on:
   push:
@@ -186,7 +186,7 @@ jobs:
         run: |
           aws --endpoint-url=${AWS_ENDPOINT_URL} \
               s3api create-bucket \
-              --bucket test-bucket   
+              --bucket test-bucket
 
       - name: Run Integration Tests
         run: sbt it/test

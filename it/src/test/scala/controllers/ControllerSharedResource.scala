@@ -23,7 +23,6 @@ import org.typelevel.log4cats.Logger
 import repository.DatabaseResource.postgresqlConfigResource
 import scala.concurrent.ExecutionContext
 import shared.HttpClientResource
-import shared.RedisCacheResource
 import shared.SessionCacheResource
 import shared.TransactorResource
 import weaver.GlobalResource
@@ -82,13 +81,12 @@ object ControllerSharedResource extends GlobalResource with BaseAppConfig {
       }
       ce <- executionContextResource
       xa <- transactorResource(postgresqlConfig.copy(host = postgresqlHost, port = postgresqlPort), ce)
-      redis <- RedisCache.make[IO](redisHost, redisPort, appConfig)
       sessionCache <- SessionCache.make[IO](appConfig)
       client <- clientResource
       _ <- serverResource(host, port, createTestRouter(xa, appConfig))
       _ <- global.putR(TransactorResource(xa))
       _ <- global.putR(HttpClientResource(client))
-      _ <- global.putR(RedisCacheResource(redis))
+      // _ <- global.putR(RedisCacheResource(redis))
       _ <- global.putR(SessionCacheResource(sessionCache))
     } yield ()
 }

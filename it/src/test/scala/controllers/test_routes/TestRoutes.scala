@@ -64,7 +64,7 @@ object TestRoutes extends BaseAppConfig {
 
       questEventProducer = new MockQuestEventProducer[IO]()
     } yield Router(
-      "/dev-quest-service" -> (
+      "/devirl-quest-service" -> (
         baseRoutes()
       )
     )

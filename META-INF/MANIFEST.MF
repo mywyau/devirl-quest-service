@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Main-Class: Main
-Specification-Title: dev-quest-service
+Specification-Title: devirl-quest-service
 Specification-Version: 0.1.0-SNAPSHOT
-Specification-Vendor: dev-quest-service
-Implementation-Title: dev-quest-service
+Specification-Vendor: devirl-quest-service
+Implementation-Title: devirl-quest-service
 Implementation-Version: 0.1.0-SNAPSHOT
-Implementation-Vendor: dev-quest-service
-Implementation-Vendor-Id: dev-quest-service
+Implementation-Vendor: devirl-quest-service
+Implementation-Vendor-Id: devirl-quest-service
 
