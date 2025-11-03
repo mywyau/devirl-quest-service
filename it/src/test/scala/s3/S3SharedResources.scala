@@ -23,7 +23,6 @@ import org.typelevel.log4cats.Logger
 import repository.DatabaseResource.postgresqlConfigResource
 import scala.concurrent.ExecutionContext
 import shared.HttpClientResource
-import shared.RedisCacheResource
 import shared.SessionCacheResource
 import shared.TransactorResource
 import weaver.GlobalResource

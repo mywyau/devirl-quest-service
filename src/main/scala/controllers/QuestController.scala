@@ -73,7 +73,7 @@ class QuestControllerImpl[F[_] : Async : Concurrent : Logger](
 
   val routes: HttpRoutes[F] = HttpRoutes.of[F] { case req @ GET -> Root / "quest" / "health" =>
     Logger[F].debug(s"[BaseControllerImpl] GET - Health check for backend QuestController service") *>
-      Ok(GetResponse("/dev-quest-service/health", "I am alive").asJson)
+      Ok(GetResponse("/devirl-quest-service/health", "I am alive").asJson)
   }
 }
 

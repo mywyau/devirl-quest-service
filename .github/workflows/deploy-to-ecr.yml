@@ -50,7 +50,7 @@ jobs:
       - name: Tag and push Docker image
         run: |
           IMAGE_TAG=${{ github.sha }}
-          IMAGE_REPO=890742562318.dkr.ecr.us-east-1.amazonaws.com/dev-quest-service
+          IMAGE_REPO=890742562318.dkr.ecr.us-east-1.amazonaws.com/devirl-quest-service
           IMAGE_URI=$IMAGE_REPO:$IMAGE_TAG
           docker build -t $IMAGE_URI target/docker/stage/
           docker push $IMAGE_URI
@@ -63,6 +63,3 @@ jobs:
             --type String \
             --overwrite \
             --region us-east-1
-     
-
-
