@@ -28,7 +28,6 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
   private def resetKafkaTopic(topic: String): IO[Unit] =
     IO.blocking {
       import sys.process._
-      s"docker exec kafka-container-redpanda-1 rpk topic delete $topic --brokers localhost:9092".!
       s"docker exec kafka-container-redpanda-1 rpk topic create $topic --brokers localhost:9092".!
     }.void
 
