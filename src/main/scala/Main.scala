@@ -38,7 +38,6 @@ import routes.Routes.*
 import scala.concurrent.duration.*
 import scala.concurrent.duration.DurationInt
 import services.*
-import services.kafka.consumers.QuestCreatedConsumer
 import services.kafka.producers.*
 
 object Main extends IOApp {
