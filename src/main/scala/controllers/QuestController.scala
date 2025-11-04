@@ -71,9 +71,30 @@ class QuestControllerImpl[F[_] : Async : Concurrent : Logger](
         Forbidden("Invalid or expired session")
     }
 
-  val routes: HttpRoutes[F] = HttpRoutes.of[F] { case req @ GET -> Root / "quest" / "health" =>
-    Logger[F].debug(s"[BaseControllerImpl] GET - Health check for backend QuestController service") *>
-      Ok(GetResponse("/devirl-quest-service/health", "I am alive").asJson)
+  val routes: HttpRoutes[F] = HttpRoutes.of[F] {
+
+    case req @ GET -> Root / "quest" / "health" =>
+      Logger[F].debug(s"[BaseControllerImpl] GET - Health check for backend QuestController service") *>
+        Ok(GetResponse("/devirl-quest-service/health", "I am alive").asJson)
+
+    case req @ POST -> Root / "quest" / "create" / userIdFromRoute =>
+      extractSessionToken(req) match {
+        case Some(cookieToken) =>
+          withValidSession(userIdFromRoute, cookieToken) {
+            Logger[F].debug(s"[QuestControllerImpl] POST - Creating quest") *>
+              req.decode[CreateQuestPartial] { request =>
+                questCRUDService.create(request, userIdFromRoute).flatMap {
+                  case Valid(response) =>
+                    Logger[F].debug(s"[QuestControllerImpl] POST - Successfully created a quest") *>
+                      Created(CreatedResponse(response.toString, "quest details created successfully").asJson)
+                  case Invalid(_) =>
+                    InternalServerError(ErrorResponse(code = "Code", message = "An error occurred").asJson)
+                }
+              }
+          }
+        case None =>
+          Unauthorized(`WWW-Authenticate`(Challenge("Bearer", "api")), "Missing Cookie")
+      }
   }
 }
 
