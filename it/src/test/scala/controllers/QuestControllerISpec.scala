@@ -116,7 +116,7 @@ class QuestControllerISpec(global: GlobalRead) extends IOSuite with ControllerIS
   }
 
   test(
-    "POST - /devirl-quest-service/quest/create/USER006 - should generate the quest data in db table, returning Created response"
+    "POST - /devirl-quest-service/quest/create/USER006 - should generate the quest data in db table and publish an event to kafka - returning a Created response"
   ) { (sharedResource, log) =>
 
     val transactor = sharedResource._1.xa
@@ -146,7 +146,7 @@ class QuestControllerISpec(global: GlobalRead) extends IOSuite with ControllerIS
 
     for {
       _ <- resetKafkaTopic(topic)
-      _ <- logger.info(s"[Producer] Sending event to topic $topic")
+      _ <- logger.info(s"[QuestControllerISpec] Sending event to topic $topic")
       testResult <- client.run(request).use { response =>
         response.as[CreatedResponse].map { body =>
           expect.all(
