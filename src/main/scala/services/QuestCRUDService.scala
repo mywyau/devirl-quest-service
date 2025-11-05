@@ -1,5 +1,7 @@
 package services
 
+import cats.Monad
+import cats.NonEmptyParallel
 import cats.data.EitherT
 import cats.data.NonEmptyList
 import cats.data.Validated
@@ -9,12 +11,11 @@ import cats.data.ValidatedNel
 import cats.effect.Concurrent
 import cats.implicits.*
 import cats.syntax.all.*
-import cats.Monad
-import cats.NonEmptyParallel
 import configuration.AppConfig
 import fs2.Stream
-import java.util.UUID
 import models.*
+import models.NotStarted
+import models.QuestStatus
 import models.database.*
 import models.events.QuestCreatedEvent
 import models.kafka.*
@@ -22,11 +23,11 @@ import models.languages.Language
 import models.quests.*
 import models.skills.Questing
 import models.work_time.HoursOfWork
-import models.NotStarted
-import models.QuestStatus
 import org.typelevel.log4cats.Logger
 import repositories.*
 import services.kafka.producers.QuestEventProducerAlgebra
+
+import java.util.UUID
 
 trait QuestCRUDServiceAlgebra[F[_]] {
 
@@ -53,12 +54,8 @@ class QuestCRUDServiceImpl[F[_] : Concurrent : NonEmptyParallel : Monad : Logger
         Logger[F].debug(s"[QuestCRUDService][getByQuestId] No quest found with ID: $questId") *> Concurrent[F].pure(None)
     }
 
-  override def create(request: CreateQuestPartial, clientId: String): F[ValidatedNel[Failure, KafkaProducerResult]] = {
-
-    val newQuestId = s"quest-${UUID.randomUUID().toString}"
-    val now = java.time.Instant.now()
-
-    val createQuest = CreateQuest(
+  private def createQuestDomainModel(request: CreateQuestPartial, clientId: String, newQuestId: String): CreateQuest =
+    CreateQuest(
       clientId = clientId,
       questId = newQuestId,
       rank = request.rank,
@@ -69,28 +66,34 @@ class QuestCRUDServiceImpl[F[_] : Concurrent : NonEmptyParallel : Monad : Logger
       status = Some(NotEstimated)
     )
 
+  private def publishEvent(event: QuestCreatedEvent, newQuestId: String): F[ValidatedNel[Failure, KafkaProducerResult]] =
+    questEventProducer
+      .publishQuestCreated(event)
+      .map(Valid(_))
+      .handleErrorWith(e =>
+        Logger[F].warn(e)(s"[QuestCRUDService][create] Failed to publish event for $newQuestId") *>
+          Concurrent[F].pure(Invalid(NonEmptyList.one(KafkaSendError(e.getMessage))))
+      )
+
+  override def create(request: CreateQuestPartial, clientId: String): F[ValidatedNel[Failure, KafkaProducerResult]] = {
+
+    val newQuestId = s"quest-${UUID.randomUUID().toString}"
+    val now = java.time.Instant.now()
+    val createQuest = createQuestDomainModel(request, clientId, newQuestId)
+    
     for {
       _ <- Logger[F].info(s"[QuestCRUDService][create] Creating new quest $newQuestId")
-
       dbResult <- questRepo.create(createQuest)
-
       result <- dbResult match {
         case Valid(_) =>
-          val event = QuestCreatedEvent(
-            questId = newQuestId,
-            title = request.title,
-            clientId = clientId,
-            createdAt = now
-          )
-
-          questEventProducer
-            .publishQuestCreated(event)
-            .map(Valid(_))
-            .handleErrorWith(e =>
-              Logger[F].warn(e)(s"[QuestCRUDService][create] Failed to publish event for $newQuestId") *>
-                Concurrent[F].pure(Invalid(NonEmptyList.one(KafkaSendError(e.getMessage))))
+          val event =
+            QuestCreatedEvent(
+              questId = newQuestId,
+              title = request.title,
+              clientId = clientId,
+              createdAt = now
             )
-
+          publishEvent(event, newQuestId)
         case Invalid(dbErrors) =>
           Logger[F].error(s"[QuestCRUDService][create] DB error: ${dbErrors.toList.mkString(", ")}") *>
             Concurrent[F].pure(Invalid(dbErrors.map(e => DatabaseFailure(e.toString))))
