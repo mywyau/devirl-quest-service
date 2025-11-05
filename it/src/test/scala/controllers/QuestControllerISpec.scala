@@ -47,7 +47,7 @@ import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import shared.HttpClientResource
 import shared.TransactorResource
-import testData.ITestConstants.*
+import test_data.ITestConstants.*
 import weaver.*
 
 import java.time.Instant

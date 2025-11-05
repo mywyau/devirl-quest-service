@@ -22,7 +22,7 @@ import repository.fragments.QuestRepoFragments.*
 import repository.RepositoryISpecBase
 import scala.collection.immutable.ArraySeq
 import shared.TransactorResource
-import testData.ITestConstants.*
+import test_data.ITestConstants.*
 import weaver.GlobalRead
 import weaver.IOSuite
 import weaver.ResourceTag

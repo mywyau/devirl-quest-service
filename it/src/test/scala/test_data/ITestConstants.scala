@@ -1,4 +1,4 @@
-package testData
+package test_data
 
 import java.time.Instant
 import java.time.LocalDateTime
