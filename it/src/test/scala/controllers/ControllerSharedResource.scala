@@ -28,6 +28,9 @@ import shared.TransactorResource
 import weaver.GlobalResource
 import weaver.GlobalWrite
 import infrastructure.cache.SessionCache
+import fs2.kafka.KafkaProducer
+import fs2.kafka.ProducerSettings
+import fs2.kafka.Acks
 
 object ControllerSharedResource extends GlobalResource with BaseAppConfig {
 
@@ -60,6 +63,13 @@ object ControllerSharedResource extends GlobalResource with BaseAppConfig {
         .build
     }
 
+  def kafkaProducerResource(): Resource[IO, KafkaProducer[IO, String, String]] =
+    KafkaProducer.resource(
+      ProducerSettings[IO, String, String]
+        .withBootstrapServers("localhost:9092") // adjust if your Kafka is elsewhere - todo move to config
+        .withAcks(Acks.All)
+    )
+  
   def sharedResources(global: GlobalWrite): Resource[IO, Unit] =
     for {
       appConfig <- appConfigResource
@@ -83,10 +93,10 @@ object ControllerSharedResource extends GlobalResource with BaseAppConfig {
       xa <- transactorResource(postgresqlConfig.copy(host = postgresqlHost, port = postgresqlPort), ce)
       sessionCache <- SessionCache.make[IO](appConfig)
       client <- clientResource
-      _ <- serverResource(host, port, createTestRouter(xa, appConfig))
+      kafkaProducer <- kafkaProducerResource()
+      _ <- serverResource(host, port, createTestRouter(appConfig, xa, kafkaProducer))
       _ <- global.putR(TransactorResource(xa))
       _ <- global.putR(HttpClientResource(client))
-      // _ <- global.putR(RedisCacheResource(redis))
       _ <- global.putR(SessionCacheResource(sessionCache))
     } yield ()
 }

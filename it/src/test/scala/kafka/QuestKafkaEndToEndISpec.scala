@@ -42,6 +42,7 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
     val kafkaProducer = sharedResource.producer
 
     val topic = s"quest.created.v1.test.${System.currentTimeMillis()}"
+    
     val event =
       QuestCreatedEvent(
         questId = "quest-e2e-001",

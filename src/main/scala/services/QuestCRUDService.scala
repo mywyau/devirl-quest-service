@@ -54,6 +54,7 @@ class QuestCRUDServiceImpl[F[_] : Concurrent : NonEmptyParallel : Monad : Logger
     }
 
   override def create(request: CreateQuestPartial, clientId: String): F[ValidatedNel[Failure, KafkaProducerResult]] = {
+
     val newQuestId = s"quest-${UUID.randomUUID().toString}"
     val now = java.time.Instant.now()
 
@@ -69,7 +70,7 @@ class QuestCRUDServiceImpl[F[_] : Concurrent : NonEmptyParallel : Monad : Logger
     )
 
     for {
-      _ <- Logger[F].debug(s"[QuestCRUDService][create] Creating new quest $newQuestId")
+      _ <- Logger[F].info(s"[QuestCRUDService][create] Creating new quest $newQuestId")
 
       dbResult <- questRepo.create(createQuest)
 
