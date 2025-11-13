@@ -4,14 +4,12 @@ import cats.data.Validated.Valid
 import cats.data.ValidatedNel
 import cats.effect.IO
 import fs2.Stream
-import models.QuestStatus
-import models.Rank
+import java.time.Instant
 import models.database.*
 import models.quests.*
-import models.work_time.HoursOfWork
+import models.QuestStatus
+import models.Rank
 import repositories.QuestRepositoryAlgebra
-
-import java.time.Instant
 
 case class MockQuestRepository(
   countActiveQuests: Int = 5,

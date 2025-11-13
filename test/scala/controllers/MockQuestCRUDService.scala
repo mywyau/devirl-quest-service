@@ -1,6 +1,5 @@
 package controllers
 
-import infrastructure.cache.*
 import cats.data.Validated.Valid
 import cats.data.ValidatedNel
 import cats.effect.*
@@ -8,13 +7,13 @@ import cats.effect.IO
 import cats.effect.Ref
 import cats.implicits.*
 import fs2.Stream
+import infrastructure.cache.*
 import models.auth.UserSession
 import models.database.*
 import models.kafka.Failure
 import models.kafka.KafkaProducerResult
 import models.kafka.SuccessfulWrite
 import models.quests.*
-import models.work_time.HoursOfWork
 import models.QuestStatus
 import models.Rank
 import services.QuestCRUDServiceAlgebra

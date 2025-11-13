@@ -28,10 +28,8 @@ object KafkaProducerProvider {
         .withBootstrapServers(bootstrap)
         .withClientId(clientId)
         .withAcks(parseAcks(acks))
-        // .withAcks(Acks.fromString(acks).getOrElse(Acks.All))
         .withProperty("linger.ms", lingerMs.toString)
         .withProperty("retries", retries.toString)
-      // Key/Value are Strings; serializers are inferred by fs2-kafka defaults
 
     KafkaProducer.resource(settings)
   }
