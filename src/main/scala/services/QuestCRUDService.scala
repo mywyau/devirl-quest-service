@@ -22,7 +22,6 @@ import models.kafka.*
 import models.languages.Language
 import models.quests.*
 import models.skills.Questing
-import models.work_time.HoursOfWork
 import org.typelevel.log4cats.Logger
 import repositories.*
 import services.kafka.producers.QuestEventProducerAlgebra
@@ -31,13 +30,7 @@ import java.util.UUID
 
 trait QuestCRUDServiceAlgebra[F[_]] {
 
-  def getByQuestId(questId: String): F[Option[QuestPartial]]
-
   def create(request: CreateQuestPartial, clientId: String): F[ValidatedNel[Failure, KafkaProducerResult]]
-
-  def update(questId: String, request: UpdateQuestPartial): F[ValidatedNel[DatabaseErrors, DatabaseSuccess]]
-
-  def delete(questId: String): F[ValidatedNel[DatabaseErrors, DatabaseSuccess]]
 }
 
 class QuestCRUDServiceImpl[F[_] : Concurrent : NonEmptyParallel : Monad : Logger](
@@ -45,14 +38,6 @@ class QuestCRUDServiceImpl[F[_] : Concurrent : NonEmptyParallel : Monad : Logger
   questRepo: QuestRepositoryAlgebra[F],
   questEventProducer: QuestEventProducerAlgebra[F]
 ) extends QuestCRUDServiceAlgebra[F] {
-
-  override def getByQuestId(questId: String): F[Option[QuestPartial]] =
-    questRepo.findByQuestId(questId).flatMap {
-      case Some(quest) =>
-        Logger[F].debug(s"[QuestCRUDService][getByQuestId] Found quest with ID: $questId") *> Concurrent[F].pure(Some(quest))
-      case None =>
-        Logger[F].debug(s"[QuestCRUDService][getByQuestId] No quest found with ID: $questId") *> Concurrent[F].pure(None)
-    }
 
   private def createQuestDomainModel(request: CreateQuestPartial, clientId: String, newQuestId: String): CreateQuest =
     CreateQuest(
@@ -100,26 +85,6 @@ class QuestCRUDServiceImpl[F[_] : Concurrent : NonEmptyParallel : Monad : Logger
       }
     } yield result
   }
-
-  override def update(questId: String, request: UpdateQuestPartial): F[ValidatedNel[DatabaseErrors, DatabaseSuccess]] =
-    questRepo.update(questId, request).flatMap {
-      case Valid(value) =>
-        Logger[F].debug(s"[QuestCRUDService][update] Successfully updated quest with ID: $questId") *>
-          Concurrent[F].pure(Valid(value))
-      case Invalid(errors) =>
-        Logger[F].error(s"[QuestCRUDService][update] Failed to update quest with ID: $questId. Errors: ${errors.toList.mkString(", ")}") *>
-          Concurrent[F].pure(Invalid(errors))
-    }
-
-  override def delete(questId: String): F[ValidatedNel[DatabaseErrors, DatabaseSuccess]] =
-    questRepo.delete(questId).flatMap {
-      case Valid(value) =>
-        Logger[F].debug(s"[QuestCRUDService][delete] Successfully deleted quest with ID: $questId") *>
-          Concurrent[F].pure(Valid(value))
-      case Invalid(errors) =>
-        Logger[F].error(s"[QuestCRUDService][delete] Failed to delete quest with ID: $questId. Errors: ${errors.toList.mkString(", ")}") *>
-          Concurrent[F].pure(Invalid(errors))
-    }
 }
 
 object QuestCRUDService {

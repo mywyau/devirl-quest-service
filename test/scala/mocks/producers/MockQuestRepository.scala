@@ -10,7 +10,6 @@ import models.events.QuestCreatedEvent
 import models.kafka.KafkaProducerResult
 import models.kafka.SuccessfulWrite
 import models.quests.*
-import models.work_time.HoursOfWork
 import models.QuestStatus
 import models.Rank
 import repositories.QuestRepositoryAlgebra
