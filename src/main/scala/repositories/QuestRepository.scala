@@ -28,8 +28,40 @@ trait QuestRepositoryAlgebra[F[_]] {
 }
 
 class QuestRepositoryImpl[F[_] : Concurrent : Monad : Logger](transactor: Transactor[F]) extends QuestRepositoryAlgebra[F] with DoobieMetas {
-
-  override def create(request: CreateQuest): F[ValidatedNel[DatabaseErrors, DatabaseSuccess]] = ???
+  
+  override def create(request: CreateQuest): F[ValidatedNel[DatabaseErrors, DatabaseSuccess]] = {
+    val tagArray: Array[String] = request.tags.map(_.toString).toArray
+    sql"""
+      INSERT INTO quests (
+         quest_id, client_id, rank, title, description, acceptance_criteria, status, tags
+      )
+      VALUES (
+        ${request.questId},
+        ${request.clientId},
+        ${request.rank},
+        ${request.title},
+        ${request.description},
+        ${request.acceptanceCriteria},
+        ${request.status},
+        $tagArray
+      )
+    """.update.run
+      .transact(transactor)
+      .attempt
+      .map {
+        case Right(affectedRows) if affectedRows == 1 =>
+          CreateSuccess.validNel
+        case Left(e: java.sql.SQLIntegrityConstraintViolationException) =>
+          ConstraintViolation.invalidNel
+        case Left(e: java.sql.SQLException) =>
+          DatabaseConnectionError.invalidNel
+        case Left(ex) =>
+          UnknownError(s"Unexpected error: ${ex.getMessage}").invalidNel
+        case _ =>
+          UnexpectedResultError.invalidNel
+      }
+  }
+  
 }
 
 object QuestRepository {

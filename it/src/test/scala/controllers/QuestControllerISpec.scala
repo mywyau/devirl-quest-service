@@ -33,6 +33,7 @@ import models.responses.DeletedResponse
 import models.responses.GetResponse
 import models.responses.UpdatedResponse
 import org.http4s.*
+import org.http4s.MediaType
 import org.http4s.Method.*
 import org.http4s.Method.GET
 import org.http4s.Request
@@ -41,6 +42,7 @@ import org.http4s.Uri
 import org.http4s.circe.*
 import org.http4s.circe.CirceEntityCodec.circeEntityDecoder
 import org.http4s.client.Client
+import org.http4s.headers.`Content-Type`
 import org.http4s.implicits.*
 import org.typelevel.ci.CIStringSyntax
 import org.typelevel.log4cats.SelfAwareStructuredLogger
@@ -56,7 +58,6 @@ import scala.collection.immutable.ArraySeq
 import scala.concurrent.duration.*
 
 class QuestControllerISpec(global: GlobalRead) extends IOSuite with ControllerISpecBase {
-
   type Res = (TransactorResource, HttpClientResource)
 
   def sharedResource: Resource[IO, Res] =
@@ -139,21 +140,33 @@ class QuestControllerISpec(global: GlobalRead) extends IOSuite with ControllerIS
 
     val request =
       Request[IO](POST, uri"http://127.0.0.1:9999/devirl-quest-service/quest/create/USER006")
-        .addCookie("auth_session", sessionToken)
         .withEntity(createRequest)
+        .addCookie("auth_session", sessionToken)
 
     val expectedBody = CreatedResponse(SuccessfulWrite.toString, "quest details created successfully")
 
     for {
       _ <- resetKafkaTopic(topic)
       _ <- logger.info(s"[QuestControllerISpec] Sending event to topic $topic")
+      // testResult <- client.run(request).use { response =>
+      //   response.as[CreatedResponse].map { body =>
+      //     expect.all(
+      //       response.status == Status.Created,
+      //       body == expectedBody
+      //     )
+      //   }
+      // }
       testResult <- client.run(request).use { response =>
-        response.as[CreatedResponse].map { body =>
-          expect.all(
-            response.status == Status.Created,
-            body == expectedBody
-          )
-        }
+        for {
+          raw <- response.bodyText.compile.string
+          _ <- logger.info(s"[QuestControllerISpec] RAW RESPONSE BODY \n$raw")
+          _ <- logger.info(s"[QuestControllerISpec] STATUS ${response.status}")
+          _ <- logger.info("[QuestControllerISpec] COOKIES: " + request.cookies.toString)
+          decoded <- IO.fromEither(io.circe.parser.decode[CreatedResponse](raw))
+        } yield expect.all(
+          response.status == Status.Created,
+          decoded == expectedBody
+        )
       }
       _ <- deleteTopic(topic)
     } yield testResult

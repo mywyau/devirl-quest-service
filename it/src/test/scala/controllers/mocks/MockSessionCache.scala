@@ -9,12 +9,11 @@ import doobie.util.transactor.Transactor
 import infrastructure.cache.SessionCacheAlgebra
 import models.auth.UserSession
 import models.cache.*
-import models.pricing.PlanSnapshot
+import org.http4s.server.Router
 import org.http4s.HttpRoutes
 import org.http4s.Uri
-import org.http4s.server.Router
-import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.SelfAwareStructuredLogger
 import repositories.*
 import services.*
 
