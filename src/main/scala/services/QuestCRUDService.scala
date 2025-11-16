@@ -19,9 +19,7 @@ import models.QuestStatus
 import models.database.*
 import models.events.QuestCreatedEvent
 import models.kafka.*
-import models.languages.Language
 import models.quests.*
-import models.skills.Questing
 import org.typelevel.log4cats.Logger
 import repositories.*
 import services.kafka.producers.QuestEventProducerAlgebra
@@ -65,7 +63,7 @@ class QuestCRUDServiceImpl[F[_] : Concurrent : NonEmptyParallel : Monad : Logger
     val newQuestId = s"quest-${UUID.randomUUID().toString}"
     val now = java.time.Instant.now()
     val createQuest = createQuestDomainModel(request, clientId, newQuestId)
-    
+
     for {
       _ <- Logger[F].info(s"[QuestCRUDService][create] Creating new quest $newQuestId")
       dbResult <- questRepo.create(createQuest)
