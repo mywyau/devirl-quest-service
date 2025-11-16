@@ -88,23 +88,6 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-      # Add LocalStack service
-      localstack:
-        image: localstack/localstack:latest
-        env:
-          SERVICES: "s3" # Specify the AWS services you need
-          DEBUG: "1"
-          DOCKER_HOST: "unix:///var/run/docker.sock"
-          DEFAULT_REGION: "us-east-1"
-          DATA_DIR: "/tmp/localstack/data"
-        ports:
-          - "4566:4566" # LocalStack default port
-        # healthcheck:
-        #   test: ["CMD-SHELL", "curl -f http://localhost:4566/health || exit 1"]
-        #   interval: 10s
-        #   timeout: 5s
-        #   retries: 5
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
