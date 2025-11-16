@@ -25,13 +25,8 @@ import models.database.*
 import models.events.QuestCreatedEvent
 import models.kafka.SuccessfulWrite
 import models.languages.*
-import models.quests.CreateQuestPartial
-import models.quests.QuestPartial
-import models.quests.UpdateQuestPartial
-import models.responses.CreatedResponse
-import models.responses.DeletedResponse
-import models.responses.GetResponse
-import models.responses.UpdatedResponse
+import models.quests.*
+import models.responses.*
 import org.http4s.*
 import org.http4s.MediaType
 import org.http4s.Method.*

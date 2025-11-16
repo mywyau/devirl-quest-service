@@ -2,28 +2,29 @@ package controllers
 
 import cats.data.Validated.Invalid
 import cats.data.Validated.Valid
-import cats.effect.kernel.Async
 import cats.effect.Concurrent
+import cats.effect.kernel.Async
 import cats.implicits.*
 import fs2.Stream
 import infrastructure.cache.*
 import infrastructure.cache.SessionCacheAlgebra
-import io.circe.syntax.EncoderOps
 import io.circe.Json
+import io.circe.syntax.EncoderOps
 import models.*
 import models.database.UpdateSuccess
 import models.quests.*
 import models.responses.*
 import org.http4s.*
+import org.http4s.Challenge
 import org.http4s.circe.*
-import org.http4s.dsl.impl.OptionalQueryParamDecoderMatcher
 import org.http4s.dsl.Http4sDsl
+import org.http4s.dsl.impl.OptionalQueryParamDecoderMatcher
 import org.http4s.headers.`WWW-Authenticate`
 import org.http4s.syntax.all.http4sHeaderSyntax
-import org.http4s.Challenge
 import org.typelevel.log4cats.Logger
-import scala.concurrent.duration.*
 import services.QuestCRUDServiceAlgebra
+
+import scala.concurrent.duration.*
 
 trait QuestControllerAlgebra[F[_]] {
   def routes: HttpRoutes[F]
@@ -36,10 +37,6 @@ class QuestControllerImpl[F[_] : Async : Concurrent : Logger](
     with QuestControllerAlgebra[F] {
 
   implicit val createDecoder: EntityDecoder[F, CreateQuestPartial] = jsonOf[F, CreateQuestPartial]
-  implicit val updateDecoder: EntityDecoder[F, UpdateQuestPartial] = jsonOf[F, UpdateQuestPartial]
-  implicit val updateQuestStatusPayloadDecoder: EntityDecoder[F, UpdateQuestStatusPayload] = jsonOf[F, UpdateQuestStatusPayload]
-  implicit val completeQuestPayloadDecoder: EntityDecoder[F, CompleteQuestPayload] = jsonOf[F, CompleteQuestPayload]
-  implicit val updateDevIdPayloadDecoder: EntityDecoder[F, AcceptQuestPayload] = jsonOf[F, AcceptQuestPayload]
 
   implicit val questStatusQueryParamDecoder: QueryParamDecoder[QuestStatus] =
     QueryParamDecoder[String].emap { str =>
