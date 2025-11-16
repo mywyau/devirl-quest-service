@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: openjdk:11
+      image: eclipse-temurin:11
 
     env:
       REDIS_HOST: redis
