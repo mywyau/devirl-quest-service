@@ -5,16 +5,16 @@
         </encoder>
     </appender>
 
-    <logger name="org.apache.kafka.clients.consumer" level="ERROR"/>
-    <logger name="org.apache.kafka.clients.FetchSessionHandler" level="ERROR"/>
-    <logger name="org.apache.kafka" level="ERROR"/>
+    <logger name="org.apache.kafka.clients.consumer" level="INFO"/>
+    <logger name="org.apache.kafka.clients.FetchSessionHandler" level="INFO"/>
+    <logger name="org.apache.kafka" level="INFO"/>
 
 
     <!-- High level logging -->
-    <logger name="org.apache.kafka.clients.consumer.internals.ConsumerCoordinator" level="ERROR"/>
+    <logger name="org.apache.kafka.clients.consumer.internals.ConsumerCoordinator" level="INFO"/>
     <!-- High level logging -->
 
-    <root level="ERROR">
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

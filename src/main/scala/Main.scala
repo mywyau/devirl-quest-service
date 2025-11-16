@@ -8,10 +8,7 @@ import configuration.ConfigReader
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
 import fs2.Stream
-import infrastructure.Database
 import infrastructure.KafkaProducerProvider
-import infrastructure.Redis
-import infrastructure.Server
 import java.time.*
 import java.time.temporal.ChronoUnit
 import java.time.Instant

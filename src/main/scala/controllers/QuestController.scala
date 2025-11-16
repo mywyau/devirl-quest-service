@@ -14,7 +14,6 @@ import models.*
 import models.database.UpdateSuccess
 import models.quests.*
 import models.responses.*
-import models.work_time.HoursOfWork
 import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.dsl.impl.OptionalQueryParamDecoderMatcher

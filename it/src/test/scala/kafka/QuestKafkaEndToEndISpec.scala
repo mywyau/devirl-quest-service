@@ -85,3 +85,4 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
     } yield expect(event.questId == received.questId)
   }
 }
+

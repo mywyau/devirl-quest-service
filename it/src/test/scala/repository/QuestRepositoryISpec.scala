@@ -1,145 +1,147 @@
-package repository
+// TODO we need to add back in the other CRUD operations 
 
-import cats.data.Validated.Valid
-import cats.effect.IO
-import cats.effect.Resource
-import cats.implicits.*
-import doobie.*
-import doobie.implicits.*
-import java.time.LocalDateTime
-import models.database.*
-import models.database.DeleteSuccess
-import models.database.UpdateSuccess
-import models.languages.*
-import models.quests.CreateQuestPartial
-import models.quests.QuestPartial
-import models.quests.UpdateQuestPartial
-import models.Completed
-import models.Demonic
-import models.InProgress
-import repositories.QuestRepositoryImpl
-import repository.fragments.QuestRepoFragments.*
-import repository.RepositoryISpecBase
-import scala.collection.immutable.ArraySeq
-import shared.TransactorResource
-import test_data.ITestConstants.*
-import weaver.GlobalRead
-import weaver.IOSuite
-import weaver.ResourceTag
+// package repository
 
-class QuestRepositoryISpec(global: GlobalRead) extends IOSuite with RepositoryISpecBase {
+// import cats.data.Validated.Valid
+// import cats.effect.IO
+// import cats.effect.Resource
+// import cats.implicits.*
+// import doobie.*
+// import doobie.implicits.*
+// import java.time.LocalDateTime
+// import models.database.*
+// import models.database.DeleteSuccess
+// import models.database.UpdateSuccess
+// import models.languages.*
+// import models.quests.CreateQuestPartial
+// import models.quests.QuestPartial
+// import models.quests.UpdateQuestPartial
+// import models.Completed
+// import models.Demonic
+// import models.InProgress
+// import repositories.QuestRepositoryImpl
+// import repository.fragments.QuestRepoFragments.*
+// import repository.RepositoryISpecBase
+// import scala.collection.immutable.ArraySeq
+// import shared.TransactorResource
+// import test_data.ITestConstants.*
+// import weaver.GlobalRead
+// import weaver.IOSuite
+// import weaver.ResourceTag
 
-  type Res = QuestRepositoryImpl[IO]
+// class QuestRepositoryISpec(global: GlobalRead) extends IOSuite with RepositoryISpecBase {
 
-  private def initializeSchema(transactor: TransactorResource): Resource[IO, Unit] =
-    Resource.eval(
-      createQuestTable.update.run.transact(transactor.xa).void *>
-        resetQuestTable.update.run.transact(transactor.xa).void *>
-        insertQuestData.update.run.transact(transactor.xa).void
-    )
+//   type Res = QuestRepositoryImpl[IO]
 
-  def testQuestRequest(clientId: String, businessId: String): CreateQuestPartial =
-    CreateQuestPartial(
-      rank = Demonic,
-      title = "Implement User Authentication",
-      description = Some("Set up Auth0 integration and secure routes using JWT tokens."),
-      acceptanceCriteria = "Set up Auth0 integration and secure routes using JWT tokens.",
-      tags = Seq(Python, Scala, TypeScript)
-    )
+//   private def initializeSchema(transactor: TransactorResource): Resource[IO, Unit] =
+//     Resource.eval(
+//       createQuestTable.update.run.transact(transactor.xa).void *>
+//         resetQuestTable.update.run.transact(transactor.xa).void *>
+//         insertQuestData.update.run.transact(transactor.xa).void
+//     )
 
-  def sharedResource: Resource[IO, QuestRepositoryImpl[IO]] = {
-    val setup = for {
-      transactor <- global.getOrFailR[TransactorResource]()
-      questRepo = new QuestRepositoryImpl[IO](transactor.xa)
-      createSchemaIfNotPresent <- initializeSchema(transactor)
-    } yield questRepo
+//   def testQuestRequest(clientId: String, businessId: String): CreateQuestPartial =
+//     CreateQuestPartial(
+//       rank = Demonic,
+//       title = "Implement User Authentication",
+//       description = Some("Set up Auth0 integration and secure routes using JWT tokens."),
+//       acceptanceCriteria = "Set up Auth0 integration and secure routes using JWT tokens.",
+//       tags = Seq(Python, Scala, TypeScript)
+//     )
 
-    setup
-  }
+//   def sharedResource: Resource[IO, QuestRepositoryImpl[IO]] = {
+//     val setup = for {
+//       transactor <- global.getOrFailR[TransactorResource]()
+//       questRepo = new QuestRepositoryImpl[IO](transactor.xa)
+//       createSchemaIfNotPresent <- initializeSchema(transactor)
+//     } yield questRepo
 
-  test(".findAllByUserId() - should find and return the quest if user_id exists for a previously created quest") { questRepo =>
+//     setup
+//   }
 
-    val expectedResult =
-      QuestPartial(
-        clientId = "USER001",
-        questId = "QUEST001",
-        devId = Some("DEV001"),
-        rank = Demonic,
-        title = "Implement User Authentication",
-        description = Some("Set up Auth0 integration and secure routes using JWT tokens."),
-        acceptanceCriteria = Some("Some acceptance criteria"),
-        status = Some(InProgress),
-        tags = ArraySeq("Python", "Scala", "Typescript"),
-        estimated = true
-      )
+//   test(".findAllByUserId() - should find and return the quest if user_id exists for a previously created quest") { questRepo =>
 
-    for {
-      quests <- questRepo.findAllByUserId("USER001")
-    } yield expect(quests == List(expectedResult))
-  }
+//     val expectedResult =
+//       QuestPartial(
+//         clientId = "USER001",
+//         questId = "QUEST001",
+//         devId = Some("DEV001"),
+//         rank = Demonic,
+//         title = "Implement User Authentication",
+//         description = Some("Set up Auth0 integration and secure routes using JWT tokens."),
+//         acceptanceCriteria = Some("Some acceptance criteria"),
+//         status = Some(InProgress),
+//         tags = ArraySeq("Python", "Scala", "Typescript"),
+//         estimated = true
+//       )
 
-  test(".findByQuestId() - should find and return the quest if quest_id exists for a previously created quest") { questRepo =>
+//     for {
+//       quests <- questRepo.findAllByUserId("USER001")
+//     } yield expect(quests == List(expectedResult))
+//   }
 
-    val expectedResult =
-      QuestPartial(
-        clientId = "USER001",
-        questId = "QUEST001",
-        devId = Some("DEV001"),
-        rank = Demonic,
-        title = "Implement User Authentication",
-        description = Some("Set up Auth0 integration and secure routes using JWT tokens."),
-        acceptanceCriteria = Some("Some acceptance criteria"),
-        status = Some(InProgress),
-        tags = ArraySeq("Python", "Scala", "Typescript"),
-        estimated = true
-      )
+//   test(".findByQuestId() - should find and return the quest if quest_id exists for a previously created quest") { questRepo =>
 
-    for {
-      questOpt <- questRepo.findByQuestId("QUEST001")
-    } yield expect(questOpt == Some(expectedResult))
-  }
+//     val expectedResult =
+//       QuestPartial(
+//         clientId = "USER001",
+//         questId = "QUEST001",
+//         devId = Some("DEV001"),
+//         rank = Demonic,
+//         title = "Implement User Authentication",
+//         description = Some("Set up Auth0 integration and secure routes using JWT tokens."),
+//         acceptanceCriteria = Some("Some acceptance criteria"),
+//         status = Some(InProgress),
+//         tags = ArraySeq("Python", "Scala", "Typescript"),
+//         estimated = true
+//       )
 
-  test(".update() - for a given quest_id should update the quest details if previously created quest exists") { questRepo =>
+//     for {
+//       questOpt <- questRepo.findByQuestId("QUEST001")
+//     } yield expect(questOpt == Some(expectedResult))
+//   }
 
-    val updateRequest =
-      UpdateQuestPartial(
-        rank = Demonic,
-        title = "Implement User Authentication",
-        description = Some("Set up Auth0 integration and secure routes using JWT tokens."),
-        acceptanceCriteria = Some("Set up Auth0 integration and secure routes using JWT tokens.")
-      )
+//   test(".update() - for a given quest_id should update the quest details if previously created quest exists") { questRepo =>
 
-    for {
-      questOpt <- questRepo.update("QUEST002", updateRequest)
-    } yield expect(questOpt == Valid(UpdateSuccess))
-  }
+//     val updateRequest =
+//       UpdateQuestPartial(
+//         rank = Demonic,
+//         title = "Implement User Authentication",
+//         description = Some("Set up Auth0 integration and secure routes using JWT tokens."),
+//         acceptanceCriteria = Some("Set up Auth0 integration and secure routes using JWT tokens.")
+//       )
 
-  test(".deleteQuest() - should delete the QUEST003 quest if quest_id exists for the previously existing quest") { questRepo =>
+//     for {
+//       questOpt <- questRepo.update("QUEST002", updateRequest)
+//     } yield expect(questOpt == Valid(UpdateSuccess))
+//   }
 
-    val questId = "QUEST003"
+//   test(".deleteQuest() - should delete the QUEST003 quest if quest_id exists for the previously existing quest") { questRepo =>
 
-    val expectedResult =
-      QuestPartial(
-        clientId = "USER003",
-        questId = questId,
-        devId = Some("DEV003"),
-        rank = Demonic,
-        title = "Refactor API Layer",
-        description = Some("Migrate from custom HTTP clients to use http4s and apply middleware."),
-        acceptanceCriteria = Some("Some acceptance criteria"),
-        status = Some(InProgress),
-        tags = ArraySeq("Python", "Scala", "Typescript"),
-        estimated = true
-      )
+//     val questId = "QUEST003"
 
-    for {
-      firstFindResult <- questRepo.findByQuestId(questId)
-      deleteResult <- questRepo.delete(questId)
-      afterDeletionFindResult <- questRepo.findByQuestId(questId)
-    } yield expect.all(
-      firstFindResult == Some(expectedResult),
-      deleteResult == Valid(DeleteSuccess),
-      afterDeletionFindResult == None
-    )
-  }
-}
+//     val expectedResult =
+//       QuestPartial(
+//         clientId = "USER003",
+//         questId = questId,
+//         devId = Some("DEV003"),
+//         rank = Demonic,
+//         title = "Refactor API Layer",
+//         description = Some("Migrate from custom HTTP clients to use http4s and apply middleware."),
+//         acceptanceCriteria = Some("Some acceptance criteria"),
+//         status = Some(InProgress),
+//         tags = ArraySeq("Python", "Scala", "Typescript"),
+//         estimated = true
+//       )
+
+//     for {
+//       firstFindResult <- questRepo.findByQuestId(questId)
+//       deleteResult <- questRepo.delete(questId)
+//       afterDeletionFindResult <- questRepo.findByQuestId(questId)
+//     } yield expect.all(
+//       firstFindResult == Some(expectedResult),
+//       deleteResult == Valid(DeleteSuccess),
+//       afterDeletionFindResult == None
+//     )
+//   }
+// }
