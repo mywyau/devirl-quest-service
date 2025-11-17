@@ -25,12 +25,6 @@ object KafkaModule {
         retries = appConfig.kafka.retries
       )
 
-      // ✅ Use it in your producers
-      // questEstimationProducer = new QuestEstimationEventProducerImpl[F](
-        // appConfig.kafka.topic.estimationFinalized,
-        // producer
-      // )
-
       questEventProducer = new QuestEventProducerImpl[F](
         appConfig.kafka.topic.questCreated,
         producer
