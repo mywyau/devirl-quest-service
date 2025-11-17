@@ -1,4 +1,4 @@
-package controllers.test_routes
+package controllers
 
 import cats.data.Validated
 import cats.data.ValidatedNel

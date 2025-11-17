@@ -11,7 +11,7 @@ import com.comcast.ip4s.Host
 import com.comcast.ip4s.Port
 import configuration.AppConfig
 import configuration.BaseAppConfig
-import controllers.test_routes.TestRoutes.*
+import controllers.TestRoutes.*
 import dev.profunktor.redis4cats.*
 import dev.profunktor.redis4cats.effect.Log.Stdout.*
 import dev.profunktor.redis4cats.Redis
