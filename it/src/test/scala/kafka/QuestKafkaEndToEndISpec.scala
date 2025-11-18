@@ -4,17 +4,18 @@ import cats.effect.*
 import cats.syntax.all.*
 import fs2.kafka.*
 import io.circe.syntax.*
-import java.time.Instant
 import models.events.QuestCompletedEvent
 import models.events.QuestCreatedEvent
 import models.events.QuestUpdatedEvent
 import models.kafka.*
-import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.SelfAwareStructuredLogger
-import scala.concurrent.duration.*
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import services.kafka.producers.QuestEventProducerImpl
 import shared.KafkaProducerResource
 import weaver.*
+
+import java.time.Instant
+import scala.concurrent.duration.*
 
 class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
   type Res = KafkaProducerResource
@@ -38,6 +39,12 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
       s"docker exec kafka-container-redpanda-1 rpk topic delete $topic --brokers localhost:9092".!
     }.void
 
+  def waitForSubscription(consumer: KafkaConsumer[IO, String, String]): IO[Unit] =
+    consumer.assignment.flatMap {
+      case empty if empty.isEmpty => IO.sleep(50.millis) *> waitForSubscription(consumer)
+      case _ => IO.unit
+    }
+
   test("QuestCreatedEvent - should be produced and consumed successfully") { (sharedResource, log) =>
 
     val kafkaProducer = sharedResource.producer
@@ -58,12 +65,13 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
       ConsumerSettings[IO, String, String]
         .withBootstrapServers("localhost:9092")
         .withGroupId(s"group-${System.currentTimeMillis()}")
-        .withAutoOffsetReset(AutoOffsetReset.Latest)
+        .withAutoOffsetReset(AutoOffsetReset.Earliest)
 
     val consumeOnce =
       KafkaConsumer
         .stream(consumerSettings)
         .subscribeTo(topic)
+        .evalTap(waitForSubscription)
         .records
         .evalMap { committable =>
           IO.fromEither(io.circe.parser.decode[QuestCreatedEvent](committable.record.value))
@@ -78,7 +86,6 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
     for {
       _ <- resetKafkaTopic(topic)
       fiber <- consumeOnce.start
-      _ <- IO.sleep(500.millis) // give consumer time to subscribe
       _ <- logger.info(s"[QuestKafkaEndToEndISpec][publishQuestCreated] Sending event to topic $topic")
       _ <- questProducer.publishQuestCreated(event)
       received <- fiber.joinWithNever
@@ -106,12 +113,13 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
       ConsumerSettings[IO, String, String]
         .withBootstrapServers("localhost:9092")
         .withGroupId(s"group-${System.currentTimeMillis()}")
-        .withAutoOffsetReset(AutoOffsetReset.Latest)
+        .withAutoOffsetReset(AutoOffsetReset.Earliest)
 
     val consumeOnce =
       KafkaConsumer
         .stream(consumerSettings)
         .subscribeTo(topic)
+        .evalTap(waitForSubscription)
         .records
         .evalMap { committable =>
           IO.fromEither(io.circe.parser.decode[QuestCompletedEvent](committable.record.value))
@@ -126,7 +134,6 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
     for {
       _ <- resetKafkaTopic(topic)
       fiber <- consumeOnce.start
-      _ <- IO.sleep(500.millis) // give consumer time to subscribe
       _ <- questProducer.publishQuestCompleted(completedEvent)
       _ <- logger.info(s"[QuestKafkaEndToEndISpec][publishQuestCompleted] Sending event to topic $topic")
 
@@ -158,12 +165,13 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
       ConsumerSettings[IO, String, String]
         .withBootstrapServers("localhost:9092")
         .withGroupId(s"group-${System.currentTimeMillis()}")
-        .withAutoOffsetReset(AutoOffsetReset.Latest)
+        .withAutoOffsetReset(AutoOffsetReset.Earliest)
 
     val consumeOnce =
       KafkaConsumer
         .stream(consumerSettings)
         .subscribeTo(topic)
+        .evalTap(waitForSubscription)
         .records
         .evalMap { committable =>
           IO.fromEither(io.circe.parser.decode[QuestUpdatedEvent](committable.record.value))
@@ -178,7 +186,6 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
     for {
       _ <- resetKafkaTopic(topic)
       fiber <- consumeOnce.start
-      _ <- IO.sleep(500.millis) // give consumer time to subscribe
       _ <- questProducer.publishQuestUpdated(updateEvent)
       _ <- logger.info(s"[QuestKafkaEndToEndISpec][publishQuestUpdated] Sending event to topic $topic")
       received <- fiber.joinWithNever
