@@ -42,7 +42,7 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
 
     val kafkaProducer = sharedResource.producer
 
-    val topic = s"quest.created.v1.test"
+    val topic = s"quest.events.test.v1"
 
     val event =
       QuestCreatedEvent(
@@ -90,7 +90,7 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
 
     val kafkaProducer = sharedResource.producer
 
-    val topic = s"quest.completed.v1.test"
+    val topic = s"quest.events.test.v1"
 
     val completedEvent =
       QuestCompletedEvent(
@@ -142,7 +142,7 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
 
     val kafkaProducer = sharedResource.producer
 
-    val topic = s"quest.updated.v1.test"
+    val topic = s"quest.events.test.v1"
 
     val updateEvent =
       QuestUpdatedEvent(

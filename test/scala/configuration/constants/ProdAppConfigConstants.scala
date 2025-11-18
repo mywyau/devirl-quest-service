@@ -1,7 +1,7 @@
 package configuration.constants
 
-import configuration.models.*
 import configuration.AppConfig
+import configuration.models.*
 
 object ProdAppConfigConstants {
 
@@ -12,11 +12,6 @@ object ProdAppConfigConstants {
       useCors = false,
       useHttpsLocalstack = true,
       useProdStripe = false
-    )
-
-  val devSubmissionConfig =
-    DevSubmissionConfig(
-      expiryDays = 730
     )
 
   val questConfig =
@@ -31,35 +26,6 @@ object ProdAppConfigConstants {
       demonicXp = 7000.00,
       ruinXp = 8000.00,
       aetherXp = 10000.00
-    )
-
-  val estimateConfig =
-    EstimationConfig(
-      localBucketSeconds = 10,
-      localMinimumEstimationWindowSeconds = 30,
-      prodBucketSeconds = 21600,
-      prodMinimumEstimationWindowSeconds = 72000,
-      intervalSeconds = 30,
-      estimationThreshold = 3,
-      maxDailyEstimates = 5
-    )
-
-  val pricingPlanConfig =
-    PricingPlanConfig(
-      cacheTtlMinutes = 60
-    )
-
-  val kafkaConfig =
-    KafkaConfig(
-      bootstrapServers = "localhost:9092",
-      clientId = "devirl-quest-service",
-      acks = "all",
-      lingerMs = 5,
-      retries = 10,
-      topic = KafkaTopicConfig(
-        "quest.created.v1",
-        "esimtation.finalized.v1"
-      )
     )
 
   val devIrlFrontendConfig =
@@ -93,48 +59,33 @@ object ProdAppConfigConstants {
       port = 6379
     )
 
-  val s3Config =
-    S3Config(
-      awsRegion = "us-east-1",
-      bucketName = "dev-submissions",
-      dockerName = "localstack",
-      host = "localhost",
-      port = 4566
-    )
-
-  val stripeConfig =
-    StripeConfig(
-      registrationRefreshUrl = "https://devirl.com/dev/stripe/onboarding/refresh",
-      registrationReturnUrl = "https://devirl.com/dev/stripe/onboarding/success",
-      paymentSuccessUrl = "https://devirl.com/payment/success",
-      paymentCancelUrl = "https://devirl.com/payment/error",
-      stripeUrl = "https://api.stripe.com/v1",
-      platformFeePercent = 2.5
-    )
-
   val prodAppConfig =
     ProdAppConfig(
       devIrlFrontendConfig = devIrlFrontendConfig,
+      kafkaConfig = kafkaConfig,
       serverConfig = appServerConfig,
       postgresqlConfig = containerPostgreSqlConfig,
-      redisConfig = redisConfig,
-      awsS3Config = s3Config,
-      stripeConfig = stripeConfig
+      redisConfig = redisConfig
+    )
+
+  val kafkaConfig =
+    KafkaConfig(
+      bootstrapServers = "localhost:9092",
+      clientId = "devirl-quest-service",
+      acks = "all",
+      lingerMs = 5,
+      retries = 10,
+      topic = KafkaTopicConfig("quest.events.v1")
     )
 
   val prodAppConfigConstant =
     AppConfig(
       featureSwitches = featureSwitches,
-      pricingPlanConfig = pricingPlanConfig,
-      devSubmission = devSubmissionConfig,
       kafka = kafkaConfig,
       questConfig = questConfig,
-      estimationConfig = estimateConfig,
       devIrlFrontendConfig = devIrlFrontendConfig,
       serverConfig = appServerConfig,
       postgresqlConfig = containerPostgreSqlConfig,
-      redisConfig = redisConfig,
-      awsS3Config = s3Config,
-      stripeConfig = stripeConfig
+      redisConfig = redisConfig
     )
 }

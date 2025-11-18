@@ -14,9 +14,8 @@ import weaver.SimpleIOSuite
 
 object AppConfigSpec extends SimpleIOSuite {
 
-  given Eq[DevSubmissionConfig] = Eq.fromUniversalEquals
   given Eq[RedisConfig] = Eq.fromUniversalEquals
-  given Eq[S3Config] = Eq.fromUniversalEquals
+  given Eq[KafkaConfig] = Eq.fromUniversalEquals
   given Eq[PostgresqlConfig] = Eq.fromUniversalEquals
   given Eq[LocalAppConfig] = Eq.fromUniversalEquals
   given Eq[IntegrationSpecConfig] = Eq.fromUniversalEquals
