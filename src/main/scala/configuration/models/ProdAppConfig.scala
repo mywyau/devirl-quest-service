@@ -2,14 +2,13 @@ package configuration.models
 
 import cats.kernel.Eq
 import configuration.models.ServerConfig
-import pureconfig.generic.derivation.*
 import pureconfig.ConfigReader
+import pureconfig.generic.derivation.*
 
 case class ProdAppConfig(
   devIrlFrontendConfig: DevIrlFrontendConfig,
-  serverConfig: ServerConfig,
+  kafkaConfig: KafkaConfig,
   postgresqlConfig: PostgresqlConfig,
   redisConfig: RedisConfig,
-  awsS3Config: S3Config,
-  stripeConfig: StripeConfig
+  serverConfig: ServerConfig
 ) derives ConfigReader

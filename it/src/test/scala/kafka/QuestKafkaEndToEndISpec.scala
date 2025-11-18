@@ -4,7 +4,9 @@ import cats.effect.*
 import cats.syntax.all.*
 import fs2.kafka.*
 import io.circe.syntax.*
+import models.events.QuestCompletedEvent
 import models.events.QuestCreatedEvent
+import models.events.QuestUpdatedEvent
 import models.kafka.*
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
@@ -37,15 +39,21 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
       s"docker exec kafka-container-redpanda-1 rpk topic delete $topic --brokers localhost:9092".!
     }.void
 
-  test("QuestCreatedEvent should be produced and consumed successfully") { (sharedResource, log) =>
+  def waitForSubscription(consumer: KafkaConsumer[IO, String, String]): IO[Unit] =
+    consumer.assignment.flatMap {
+      case empty if empty.isEmpty => IO.sleep(50.millis) *> waitForSubscription(consumer)
+      case _ => IO.unit
+    }
+
+  test("QuestCreatedEvent - should be produced and consumed successfully") { (sharedResource, log) =>
 
     val kafkaProducer = sharedResource.producer
 
-    val topic = s"quest.created.v1.test.${System.currentTimeMillis()}"
-    
+    val topic = s"quest.events.test1.v1"
+
     val event =
       QuestCreatedEvent(
-        questId = "quest-e2e-001",
+        questId = "quest001",
         title = "End-to-End Test Quest",
         clientId = "client-e2e",
         createdAt = Instant.now()
@@ -57,12 +65,13 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
       ConsumerSettings[IO, String, String]
         .withBootstrapServers("localhost:9092")
         .withGroupId(s"group-${System.currentTimeMillis()}")
-        .withAutoOffsetReset(AutoOffsetReset.Latest)
+        .withAutoOffsetReset(AutoOffsetReset.Earliest)
 
     val consumeOnce =
       KafkaConsumer
         .stream(consumerSettings)
         .subscribeTo(topic)
+        .evalTap(waitForSubscription)
         .records
         .evalMap { committable =>
           IO.fromEither(io.circe.parser.decode[QuestCreatedEvent](committable.record.value))
@@ -72,17 +81,118 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
         .take(1)
         .compile
         .lastOrError
-        .timeout(5.seconds)
+        .timeout(10.seconds)
 
     for {
       _ <- resetKafkaTopic(topic)
-      _ <- logger.info(s"[Producer] Sending event to topic $topic")
       fiber <- consumeOnce.start
-      _ <- IO.sleep(500.millis) // give consumer time to subscribe
+      _ <- logger.info(s"[QuestKafkaEndToEndISpec][publishQuestCreated] Sending event to topic $topic")
       _ <- questProducer.publishQuestCreated(event)
       received <- fiber.joinWithNever
       _ <- deleteTopic(topic)
     } yield expect(event.questId == received.questId)
   }
-}
 
+  test("QuestCompletedEvent - should be produced and consumed successfully") { (sharedResource, log) =>
+
+    val kafkaProducer = sharedResource.producer
+
+    val topic = s"quest.events.test2.v1"
+
+    val completedEvent =
+      QuestCompletedEvent(
+        questId = "quest002",
+        title = "Quest Completed Event",
+        clientId = "client001",
+        createdAt = Instant.now()
+      )
+
+    val questProducer = new QuestEventProducerImpl[IO](topic, kafkaProducer)
+
+    val consumerSettings =
+      ConsumerSettings[IO, String, String]
+        .withBootstrapServers("localhost:9092")
+        .withGroupId(s"group-${System.currentTimeMillis()}")
+        .withAutoOffsetReset(AutoOffsetReset.Earliest)
+
+    val consumeOnce =
+      KafkaConsumer
+        .stream(consumerSettings)
+        .subscribeTo(topic)
+        .evalTap(waitForSubscription)
+        .records
+        .evalMap { committable =>
+          IO.fromEither(io.circe.parser.decode[QuestCompletedEvent](committable.record.value))
+            .flatTap(ev => logger.info(s"[QuestKafkaEndToEndISpec][Consumer] Received: ${ev.questId}"))
+            .flatTap(_ => committable.offset.commit)
+        }
+        .take(1)
+        .compile
+        .lastOrError
+        .timeout(10.seconds)
+
+    for {
+      _ <- resetKafkaTopic(topic)
+      fiber <- consumeOnce.start
+      _ <- questProducer.publishQuestCompleted(completedEvent)
+      _ <- logger.info(s"[QuestKafkaEndToEndISpec][publishQuestCompleted] Sending event to topic $topic")
+
+      received <- fiber.joinWithNever
+      _ <- deleteTopic(topic)
+    } yield expect.all(
+      completedEvent.questId == received.questId,
+      completedEvent.title == received.title
+    )
+  }
+
+  test("QuestUpdatedEvent - should be produced and consumed successfully") { (sharedResource, log) =>
+
+    val kafkaProducer = sharedResource.producer
+
+    val topic = s"quest.events.test3.v1"
+
+    val updateEvent =
+      QuestUpdatedEvent(
+        questId = "quest003",
+        title = "Quest Updated Event",
+        clientId = "client001",
+        createdAt = Instant.now()
+      )
+
+    val questProducer = new QuestEventProducerImpl[IO](topic, kafkaProducer)
+
+    val consumerSettings =
+      ConsumerSettings[IO, String, String]
+        .withBootstrapServers("localhost:9092")
+        .withGroupId(s"group-${System.currentTimeMillis()}")
+        .withAutoOffsetReset(AutoOffsetReset.Earliest)
+
+    val consumeOnce =
+      KafkaConsumer
+        .stream(consumerSettings)
+        .subscribeTo(topic)
+        .evalTap(waitForSubscription)
+        .records
+        .evalMap { committable =>
+          IO.fromEither(io.circe.parser.decode[QuestUpdatedEvent](committable.record.value))
+            .flatTap(ev => logger.info(s"[QuestKafkaEndToEndISpec][Consumer] Received: ${ev.questId}"))
+            .flatTap(_ => committable.offset.commit)
+        }
+        .take(1)
+        .compile
+        .lastOrError
+        .timeout(10.seconds)
+
+    for {
+      _ <- resetKafkaTopic(topic)
+      fiber <- consumeOnce.start
+      _ <- questProducer.publishQuestUpdated(updateEvent)
+      _ <- logger.info(s"[QuestKafkaEndToEndISpec][publishQuestUpdated] Sending event to topic $topic")
+      received <- fiber.joinWithNever
+      _ <- deleteTopic(topic)
+    } yield expect.all(
+      updateEvent.questId == received.questId,
+      updateEvent.title == received.title
+    )
+  }
+}

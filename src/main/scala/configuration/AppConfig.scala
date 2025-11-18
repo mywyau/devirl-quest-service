@@ -6,19 +6,11 @@ import pureconfig.ConfigReader
 import pureconfig.generic.derivation.*
 
 case class AppConfig(
-  featureSwitches: FeatureSwitches,
-  pricingPlanConfig: PricingPlanConfig,
-  devSubmission: DevSubmissionConfig,
-  kafka: KafkaConfig,
-  redisConfig: RedisConfig,
-  questConfig: QuestConfig,
-  estimationConfig: EstimationConfig,
   devIrlFrontendConfig: DevIrlFrontendConfig,
-  serverConfig: ServerConfig,
+  featureSwitches: FeatureSwitches,
+  kafka: KafkaConfig,
   postgresqlConfig: PostgresqlConfig,
-  awsS3Config: S3Config,
-  stripeConfig: StripeConfig
-  // localAppConfig: LocalAppConfig,
-  // prodAppConfig: ProdAppConfig,
-  // integrationSpecConfig: IntegrationSpecConfig
+  questConfig: QuestConfig,
+  serverConfig: ServerConfig,
+  redisConfig: RedisConfig
 ) derives ConfigReader

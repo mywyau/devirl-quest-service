@@ -13,12 +13,7 @@ object LocalAppConfigConstants {
       useHttpsLocalstack = true,
       useProdStripe = false
     )
-
-  val devSubmissionConfig =
-    DevSubmissionConfig(
-      expiryDays = 730
-    )
-
+    
   val questConfig =
     QuestConfig(
       maxActiveQuests = 5,
@@ -33,22 +28,6 @@ object LocalAppConfigConstants {
       aetherXp = 10000.00
     )
 
-  val estimateConfig =
-    EstimationConfig(
-      localBucketSeconds = 10,
-      localMinimumEstimationWindowSeconds = 30,
-      prodBucketSeconds = 21600,
-      prodMinimumEstimationWindowSeconds = 72000,
-      intervalSeconds = 30,
-      estimationThreshold = 3,
-      maxDailyEstimates = 5
-    )
-
-  val pricingPlanConfig =
-    PricingPlanConfig(
-      cacheTtlMinutes = 60
-    )
-
   val kafkaConfig =
     KafkaConfig(
       bootstrapServers = "localhost:9092",
@@ -56,10 +35,7 @@ object LocalAppConfigConstants {
       acks = "all",
       lingerMs = 5,
       retries = 10,
-      topic = KafkaTopicConfig(
-        "quest.created.v1",
-        "esimtation.finalized.v1"
-      )
+      topic = KafkaTopicConfig("quest.events.v1")
     )
 
   val devIrlFrontendConfig =
@@ -75,7 +51,7 @@ object LocalAppConfigConstants {
       port = 8080
     )
 
-  val containerPostgreSqlConfig =
+  val postgreSqlConfig =
     PostgresqlConfig(
       dbName = "dev_quest_db",
       dockerHost = "dev-quest-container",
@@ -93,48 +69,23 @@ object LocalAppConfigConstants {
       port = 6379
     )
 
-  val s3Config =
-    S3Config(
-      awsRegion = "us-east-1",
-      bucketName = "dev-submissions",
-      dockerName = "localstack",
-      host = "localhost",
-      port = 4566
-    )
-
-  val stripeConfig =
-    StripeConfig(
-      registrationRefreshUrl = "http://localhost:3000/dev/stripe/onboarding/refresh",
-      registrationReturnUrl = "http://localhost:3000/dev/stripe/onboarding/success",
-      paymentSuccessUrl = "http://localhost:3000/payment/success",
-      paymentCancelUrl = "http://localhost:3000/payment/error",
-      stripeUrl = "https://api.stripe.com/v1",
-      platformFeePercent = 2.5
-    )
-
   val localAppConfig =
     LocalAppConfig(
       devIrlFrontendConfig = devIrlFrontendConfig,
+      kafkaConfig = kafkaConfig,
       serverConfig = appServerConfig,
-      postgresqlConfig = containerPostgreSqlConfig,
-      redisConfig = redisConfig,
-      awsS3Config = s3Config,
-      stripeConfig = stripeConfig
+      postgresqlConfig = postgreSqlConfig,
+      redisConfig = redisConfig
     )
 
   val localAppConfigConstant =
     AppConfig(
       featureSwitches = featureSwitches,
-      pricingPlanConfig = pricingPlanConfig,
-      devSubmission = devSubmissionConfig,
       kafka = kafkaConfig,
       questConfig = questConfig,
-      estimationConfig = estimateConfig,
       devIrlFrontendConfig = devIrlFrontendConfig,
       serverConfig = appServerConfig,
-      postgresqlConfig = containerPostgreSqlConfig,
-      redisConfig = redisConfig,
-      awsS3Config = s3Config,
-      stripeConfig = stripeConfig
+      postgresqlConfig = postgreSqlConfig,
+      redisConfig = redisConfig
     )
 }

@@ -1,8 +1,7 @@
 package configuration.models
 
 final case class KafkaTopicConfig(
-  questCreated: String,
-  estimationFinalized: String
+  questEventsTopic: String
 )
 
 final case class KafkaConfig(

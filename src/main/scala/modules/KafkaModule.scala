@@ -1,12 +1,12 @@
 // modules/KafkaModule.scala
 package modules
 
-import cats.effect._
-import fs2.kafka._
-import services.kafka.producers._
-import infrastructure.KafkaProducerProvider
+import cats.effect.*
 import configuration.AppConfig
+import fs2.kafka.*
+import infrastructure.KafkaProducerProvider
 import org.typelevel.log4cats.Logger
+import services.kafka.producers.*
 
 final case class KafkaProducers[F[_]](
   questEventProducer: QuestEventProducerAlgebra[F]
@@ -14,7 +14,7 @@ final case class KafkaProducers[F[_]](
 
 object KafkaModule {
 
-  def make[F[_]: Async: Logger](appConfig: AppConfig): Resource[F, KafkaProducers[F]] = {
+  def make[F[_] : Async : Logger](appConfig: AppConfig): Resource[F, KafkaProducers[F]] =
     for {
       // ✅ Use your existing provider
       producer <- KafkaProducerProvider.make[F](
@@ -25,11 +25,7 @@ object KafkaModule {
         retries = appConfig.kafka.retries
       )
 
-      questEventProducer = new QuestEventProducerImpl[F](
-        appConfig.kafka.topic.questCreated,
-        producer
-      )
+      questEventProducer = new QuestEventProducerImpl[F](appConfig.kafka.topic.questEventsTopic, producer)
 
     } yield KafkaProducers(questEventProducer)
-  }
 }
