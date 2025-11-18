@@ -251,3 +251,9 @@ This can be in a separate repo so we do not install the dependency here.
 ```
 npm install -g @mermaid-js/mermaid-cli
 ```
+
+
+### Kafka topic commands
+
+rpk topic list --brokers localhost:9092  
+rpk topic delete quest.updated.v1.test --brokers localhost:9092

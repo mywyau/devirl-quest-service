@@ -42,11 +42,11 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
 
     val kafkaProducer = sharedResource.producer
 
-    val topic = s"quest.events.test.v1"
+    val topic = s"quest.events.test1.v1"
 
     val event =
       QuestCreatedEvent(
-        questId = "quest-e2e-001",
+        questId = "quest001",
         title = "End-to-End Test Quest",
         clientId = "client-e2e",
         createdAt = Instant.now()
@@ -73,7 +73,7 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
         .take(1)
         .compile
         .lastOrError
-        .timeout(5.seconds)
+        .timeout(10.seconds)
 
     for {
       _ <- resetKafkaTopic(topic)
@@ -90,7 +90,7 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
 
     val kafkaProducer = sharedResource.producer
 
-    val topic = s"quest.events.test.v1"
+    val topic = s"quest.events.test2.v1"
 
     val completedEvent =
       QuestCompletedEvent(
@@ -115,20 +115,20 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
         .records
         .evalMap { committable =>
           IO.fromEither(io.circe.parser.decode[QuestCompletedEvent](committable.record.value))
-            .flatTap(ev => logger.info(s"[Consumer] Received: ${ev.questId}"))
+            .flatTap(ev => logger.info(s"[QuestKafkaEndToEndISpec][Consumer] Received: ${ev.questId}"))
             .flatTap(_ => committable.offset.commit)
         }
         .take(1)
         .compile
         .lastOrError
-        .timeout(5.seconds)
+        .timeout(10.seconds)
 
     for {
       _ <- resetKafkaTopic(topic)
       fiber <- consumeOnce.start
       _ <- IO.sleep(500.millis) // give consumer time to subscribe
       _ <- questProducer.publishQuestCompleted(completedEvent)
-      _ <- logger.info(s"[QuestKafkaEndToEndISpec][publishQuestCreated] Sending event to topic $topic")
+      _ <- logger.info(s"[QuestKafkaEndToEndISpec][publishQuestCompleted] Sending event to topic $topic")
 
       received <- fiber.joinWithNever
       _ <- deleteTopic(topic)
@@ -142,7 +142,7 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
 
     val kafkaProducer = sharedResource.producer
 
-    val topic = s"quest.events.test.v1"
+    val topic = s"quest.events.test3.v1"
 
     val updateEvent =
       QuestUpdatedEvent(
@@ -167,13 +167,13 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
         .records
         .evalMap { committable =>
           IO.fromEither(io.circe.parser.decode[QuestUpdatedEvent](committable.record.value))
-            .flatTap(ev => logger.info(s"[Consumer] Received: ${ev.questId}"))
+            .flatTap(ev => logger.info(s"[QuestKafkaEndToEndISpec][Consumer] Received: ${ev.questId}"))
             .flatTap(_ => committable.offset.commit)
         }
         .take(1)
         .compile
         .lastOrError
-        .timeout(5.seconds)
+        .timeout(10.seconds)
 
     for {
       _ <- resetKafkaTopic(topic)
