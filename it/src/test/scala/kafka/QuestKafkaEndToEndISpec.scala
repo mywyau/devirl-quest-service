@@ -4,6 +4,7 @@ import cats.effect.*
 import cats.syntax.all.*
 import fs2.kafka.*
 import io.circe.syntax.*
+import models.Envelope
 import models.events.QuestCompletedEvent
 import models.events.QuestCreatedEvent
 import models.events.QuestUpdatedEvent
@@ -74,7 +75,8 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
         .evalTap(waitForSubscription)
         .records
         .evalMap { committable =>
-          IO.fromEither(io.circe.parser.decode[QuestCreatedEvent](committable.record.value))
+          IO.fromEither(io.circe.parser.decode[Envelope[QuestCreatedEvent]](committable.record.value))
+            .map(_.payload)
             .flatTap(ev => logger.info(s"[Consumer] Received: ${ev.questId}"))
             .flatTap(_ => committable.offset.commit)
         }
@@ -122,7 +124,8 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
         .evalTap(waitForSubscription)
         .records
         .evalMap { committable =>
-          IO.fromEither(io.circe.parser.decode[QuestCompletedEvent](committable.record.value))
+          IO.fromEither(io.circe.parser.decode[Envelope[QuestCompletedEvent]](committable.record.value))
+            .map(_.payload)
             .flatTap(ev => logger.info(s"[QuestKafkaEndToEndISpec][Consumer] Received: ${ev.questId}"))
             .flatTap(_ => committable.offset.commit)
         }
@@ -174,7 +177,8 @@ class QuestKafkaEndToEndISpec(global: GlobalRead) extends IOSuite {
         .evalTap(waitForSubscription)
         .records
         .evalMap { committable =>
-          IO.fromEither(io.circe.parser.decode[QuestUpdatedEvent](committable.record.value))
+          IO.fromEither(io.circe.parser.decode[Envelope[QuestUpdatedEvent]](committable.record.value))
+            .map(_.payload)
             .flatTap(ev => logger.info(s"[QuestKafkaEndToEndISpec][Consumer] Received: ${ev.questId}"))
             .flatTap(_ => committable.offset.commit)
         }

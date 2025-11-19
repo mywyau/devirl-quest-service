@@ -4,6 +4,7 @@ import cats.effect.Sync
 import cats.syntax.all.*
 import fs2.kafka.*
 import io.circe.syntax.*
+import models.Envelope
 import models.events.QuestCompletedEvent
 import models.events.QuestCreatedEvent
 import models.events.QuestUpdatedEvent
@@ -34,13 +35,40 @@ final class QuestEventProducerImpl[F[_] : Sync](
     }
   }
 
-  override def publishQuestCreated(event: QuestCreatedEvent): F[KafkaProducerResult] =
-    publishEvent(event.questId, event.asJson.noSpaces)
+  override def publishQuestCreated(event: QuestCreatedEvent): F[KafkaProducerResult] = {
+    val envelope =
+      Envelope(
+        typeName = "quest.created",
+        payload = event
+      )
+    publishEvent(event.questId, envelope.asJson.noSpaces)
+  }
 
-  override def publishQuestCompleted(event: QuestCompletedEvent): F[KafkaProducerResult] =
-    publishEvent(event.questId, event.asJson.noSpaces)
+  override def publishQuestCompleted(event: QuestCompletedEvent): F[KafkaProducerResult] = {
+    val envelope =
+      Envelope(
+        typeName = "quest.completed",
+        payload = event
+      )
+    publishEvent(event.questId, envelope.asJson.noSpaces)
+  }
 
-  override def publishQuestUpdated(event: QuestUpdatedEvent): F[KafkaProducerResult] =
-    publishEvent(event.questId, event.asJson.noSpaces)
+  override def publishQuestUpdated(event: QuestUpdatedEvent): F[KafkaProducerResult] = {
+    val envelope =
+      Envelope(
+        typeName = "quest.update",
+        payload = event
+      )
+    publishEvent(event.questId, envelope.asJson.noSpaces)
+  }
+
+  // override def publishQuestCreated(event: QuestCreatedEvent): F[KafkaProducerResult] =
+  //   publishEvent(event.questId, event.asJson.noSpaces)
+
+  // override def publishQuestCompleted(event: QuestCompletedEvent): F[KafkaProducerResult] =
+  //   publishEvent(event.questId, event.asJson.noSpaces)
+
+  // override def publishQuestUpdated(event: QuestUpdatedEvent): F[KafkaProducerResult] =
+  //   publishEvent(event.questId, event.asJson.noSpaces)
 
 }
