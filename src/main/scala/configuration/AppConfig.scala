@@ -10,7 +10,6 @@ case class AppConfig(
   featureSwitches: FeatureSwitches,
   kafka: KafkaConfig,
   postgresqlConfig: PostgresqlConfig,
-  questConfig: QuestConfig,
   serverConfig: ServerConfig,
   redisConfig: RedisConfig
 ) derives ConfigReader

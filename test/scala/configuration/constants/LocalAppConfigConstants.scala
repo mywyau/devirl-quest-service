@@ -13,20 +13,6 @@ object LocalAppConfigConstants {
       useHttpsLocalstack = true,
       useProdStripe = false
     )
-    
-  val questConfig =
-    QuestConfig(
-      maxActiveQuests = 5,
-      bronzeXp = 1000.00,
-      ironXp = 2000.00,
-      steelXp = 3000.00,
-      mithrilXp = 4000.00,
-      adamantiteXp = 5000.00,
-      runicXp = 6000.00,
-      demonicXp = 7000.00,
-      ruinXp = 8000.00,
-      aetherXp = 10000.00
-    )
 
   val kafkaConfig =
     KafkaConfig(
@@ -56,7 +42,7 @@ object LocalAppConfigConstants {
       dbName = "dev_quest_db",
       dockerHost = "dev-quest-container",
       host = "localhost",
-      port = 5432,
+      port = 5431,
       username = "dev_quest_user",
       password = "turnip",
       maxPoolSize = 42
@@ -82,7 +68,6 @@ object LocalAppConfigConstants {
     AppConfig(
       featureSwitches = featureSwitches,
       kafka = kafkaConfig,
-      questConfig = questConfig,
       devIrlFrontendConfig = devIrlFrontendConfig,
       serverConfig = appServerConfig,
       postgresqlConfig = postgreSqlConfig,

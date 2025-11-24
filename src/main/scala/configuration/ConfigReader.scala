@@ -1,7 +1,6 @@
 package configuration
 
 import cats.effect.Sync
-import configuration.models.ServicesConfig
 import pureconfig.ConfigSource
 
 trait EnvProvider { def current: String } // returns "local" | "prod" | "integration"

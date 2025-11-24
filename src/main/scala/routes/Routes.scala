@@ -26,8 +26,8 @@ object Routes {
   }
 
   def questsRoutes[F[_] : Concurrent : Temporal : NonEmptyParallel : Async : Logger](
-    transactor: HikariTransactor[F],
     appConfig: AppConfig,
+    transactor: HikariTransactor[F],
     questEventProducer: QuestEventProducerAlgebra[F]
   ): HttpRoutes[F] = {
 

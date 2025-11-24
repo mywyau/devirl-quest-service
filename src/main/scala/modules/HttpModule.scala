@@ -57,7 +57,7 @@ object HttpModule {
   ): HttpRoutes[F] =
     Router(
       "/devirl-quest-service" -> (
-        Routes.baseRoutes()
+        Routes.baseRoutes() <+> Routes.questsRoutes(appConfig, transactor, kafkaProducers.questEventProducer)
       )
     )
 

@@ -14,20 +14,6 @@ object IntegrationConfigConstants {
       useProdStripe = false
     )
 
-  val questConfig =
-    QuestConfig(
-      maxActiveQuests = 5,
-      bronzeXp = 1000.00,
-      ironXp = 2000.00,
-      steelXp = 3000.00,
-      mithrilXp = 4000.00,
-      adamantiteXp = 5000.00,
-      runicXp = 6000.00,
-      demonicXp = 7000.00,
-      ruinXp = 8000.00,
-      aetherXp = 10000.00
-    )
-
   val itDevIrlFrontendConfig =
     DevIrlFrontendConfig(
       host = "0.0.0.0",
@@ -56,7 +42,7 @@ object IntegrationConfigConstants {
       dbName = "dev_quest_test_db",
       dockerHost = "dev-quest-db-it",
       host = "localhost",
-      port = 5431,
+      port = 5432,
       username = "dev_quest_test_user",
       password = "turnip",
       maxPoolSize = 42
@@ -82,7 +68,6 @@ object IntegrationConfigConstants {
     AppConfig(
       featureSwitches = featureSwitches,
       kafka = kafkaConfig,
-      questConfig = questConfig,
       devIrlFrontendConfig = itDevIrlFrontendConfig,
       serverConfig = itSpecServerConfig,
       postgresqlConfig = itPostgresqlConfig,
