@@ -39,11 +39,11 @@ object LocalAppConfigConstants {
 
   val postgreSqlConfig =
     PostgresqlConfig(
-      dbName = "dev_quest_db",
-      dockerHost = "dev-quest-container",
+      dbName = "dev_quests_db",
+      dockerHost = "dev-quests-container",
       host = "localhost",
       port = 5431,
-      username = "dev_quest_user",
+      username = "dev_quests_user",
       password = "turnip",
       maxPoolSize = 42
     )
