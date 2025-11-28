@@ -57,41 +57,41 @@ class QuestControllerImpl[F[_] : Async : Concurrent : Logger](
   private def withValidSession(userId: String, token: String)(onValid: F[Response[F]]): F[Response[F]] =
     sessionCache.getSession(userId).flatMap {
       case Some(userSessionJson) if userSessionJson.cookieValue == token =>
-        Logger[F].debug("[QuestControllerImpl][withValidSession] Found valid session for userId:") *>
+        Logger[F].info("[QuestControllerImpl][withValidSession] Found valid session for userId:") *>
           onValid
       case Some(_) =>
-        Logger[F].debug("[QuestControllerImpl][withValidSession] User session does not match requested user session token value from redis.")
+        Logger[F].info("[QuestControllerImpl][withValidSession] User session does not match requested user session token value from redis.")
         Forbidden("User session does not match requested user session token value from redis.")
       case None =>
-        Logger[F].debug("[QuestControllerImpl][withValidSession] Invalid or expired session")
+        Logger[F].info("[QuestControllerImpl][withValidSession] Invalid or expired session")
         Forbidden("Invalid or expired session")
     }
 
   val routes: HttpRoutes[F] = HttpRoutes.of[F] {
 
     case req @ GET -> Root / "quest" / "health" =>
-      Logger[F].debug(s"[BaseControllerImpl] GET - Health check for backend QuestController service") *>
+      Logger[F].info(s"[BaseControllerImpl] GET - Health check for backend QuestController service") *>
         Ok(GetResponse("/devirl-quest-service/health", "I am alive").asJson)
 
     case req @ POST -> Root / "quest" / "create" / userIdFromRoute =>
-      extractSessionToken(req) match {
-        case Some(cookieToken) =>
-          withValidSession(userIdFromRoute, cookieToken) {
-            Logger[F].debug(s"[QuestControllerImpl] POST - Creating quest") *>
+      // extractSessionToken(req) match {
+        // case Some(cookieToken) =>
+          // withValidSession(userIdFromRoute, cookieToken) {
+            Logger[F].info(s"[QuestControllerImpl] POST - Creating quest") *>
               req.decode[CreateQuestPartial] { request =>
                 questCRUDService.create(request, userIdFromRoute).flatMap {
                   case Valid(response) =>
-                    Logger[F].debug(s"[QuestControllerImpl] POST - Successfully created a quest") *>
+                    Logger[F].info(s"[QuestControllerImpl] POST - Successfully created a quest") *>
                       Created(CreatedResponse(response.toString, "quest details created successfully").asJson)
                   case Invalid(_) =>
                     InternalServerError(ErrorResponse(code = "Code", message = "An error occurred").asJson)
                 }
               }
           }
-        case None =>
-          Unauthorized(`WWW-Authenticate`(Challenge("Bearer", "api")), "Missing Cookie")
-      }
-  }
+      //   case None =>
+      //     Unauthorized(`WWW-Authenticate`(Challenge("Bearer", "api")), "Missing Cookie")
+      // }
+  // }
 }
 
 object QuestController {

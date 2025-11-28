@@ -21,9 +21,7 @@ object CreateQuestSpec extends SimpleIOSuite with ModelsBaseSpec {
       rank = Iron,
       title = "Fix this code for me",
       description = Some("Some description"),
-      acceptanceCriteria = "Some acceptance criteria",
-      tags = Seq(Python, Scala, TypeScript),
-      status = Some(Open)
+      acceptanceCriteria = "Some acceptance criteria"
     )
 
   test("CreateQuest model encodes correctly to JSON") {
@@ -38,9 +36,7 @@ object CreateQuestSpec extends SimpleIOSuite with ModelsBaseSpec {
         |  "rank" : "Iron",
         |  "title" : "Fix this code for me",
         |  "description" : "Some description",
-        |  "acceptanceCriteria" : "Some acceptance criteria",
-        |  "tags" : ["Python", "Scala", "TypeScript"],          
-        |  "status" : "Open"
+        |  "acceptanceCriteria" : "Some acceptance criteria"
         |}
         |""".stripMargin
 

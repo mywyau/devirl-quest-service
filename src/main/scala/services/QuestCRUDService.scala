@@ -45,8 +45,7 @@ class QuestCRUDServiceImpl[F[_] : Concurrent : NonEmptyParallel : Monad : Logger
       title = request.title,
       description = request.description,
       acceptanceCriteria = request.acceptanceCriteria,
-      tags = request.tags,
-      status = Some(NotEstimated)
+      // tags = request.tags
     )
 
   private def publishEvent(event: QuestCreatedEvent, newQuestId: String): F[ValidatedNel[Failure, KafkaProducerResult]] =
