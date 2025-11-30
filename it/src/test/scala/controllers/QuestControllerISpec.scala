@@ -143,14 +143,6 @@ class QuestControllerISpec(global: GlobalRead) extends IOSuite with ControllerIS
     for {
       _ <- resetKafkaTopic(topic)
       _ <- logger.info(s"[QuestControllerISpec] Sending event to topic $topic")
-      // testResult <- client.run(request).use { response =>
-      //   response.as[CreatedResponse].map { body =>
-      //     expect.all(
-      //       response.status == Status.Created,
-      //       body == expectedBody
-      //     )
-      //   }
-      // }
       testResult <- client.run(request).use { response =>
         for {
           raw <- response.bodyText.compile.string
